@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: python-docker-app:latest
+    environment:
+      - APP_NAME=StaeriumServer
+    restart: unless-stopped

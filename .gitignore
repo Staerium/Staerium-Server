@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+share/python-wheels/
+
+# Virtual environments
+.venv/
+.env/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+.nox/
+.tox/
+.cache/
+coverage.xml
+*.cover
+*.py,cover
+
+# Type checker / linter caches
+.mypy_cache/
+.pytype/
+.pyre/
+.ruff_cache/
+.dmypy.json
+
+# Runtime logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints
+
+# Pyenv / direnv
+.python-version
+.python-version.*
+.pdm-python
+.envrc
+
+# Environment variables
+.env.local
+.env.*.local
+.env.test
+.env.development
+.env.production
+!.env.example
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+
+# macOS metadata
+.DS_Store
+Thumbs.db
