@@ -179,7 +179,7 @@ def telegram_received(telegram):
                 mode = val
             else:
                 mode = not val
-            if configuration.Debug: print(f"Sector {sector["Name"]} set to {"Auto" if mode else "On"} mode from bus")
+            if configuration.Debug: print(f"Sector {sector['Name']} set to {'Auto' if mode else 'On'} mode from bus")
             SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "On"
 
         if str(telegram.destination_address) == sector["OffAutoAddress"]:

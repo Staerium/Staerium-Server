@@ -27,7 +27,7 @@ def _get_setting(source: Any, key: str, default: Any = None) -> Any:
 ip_address_knx = "127.0.0.1"
 ip_address_internet = "127.0.0.1"
 
-Debug = True #TODO: deactivate for production
+Debug = False #TODO: deactivate for production
 
 
 #imported from config

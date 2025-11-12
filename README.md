@@ -3,7 +3,7 @@
 Starter Python workspace for Staerium experiments and prototypes.
 
 ## Requirements
-- Python 3.10+
+- Python 3.12+
 - pip (comes with recent Python versions)
 
 ## Getting Started

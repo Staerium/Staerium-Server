@@ -44,22 +44,22 @@ def start(loop):
     calculate_lps()
     for sector in configuration.sectors:
         if sector["HeightAddress"] != "":
-            sectors[sector["GUID"]]["HeightSender"] = NumericValue(xknx=xknx, name=f"{sector["GUID"]}_height", group_address=sector["HeightAddress"], respond_to_read=True, value_type=5)
+            sectors[sector["GUID"]]["HeightSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_height", group_address=sector["HeightAddress"], respond_to_read=True, value_type=5)
         else:
-            sectors[sector["GUID"]]["HeightSender"] = NumericValue(xknx=xknx, name=f"{sector["GUID"]}_height", group_address=None, respond_to_read=True, value_type=5)
+            sectors[sector["GUID"]]["HeightSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_height", group_address=None, respond_to_read=True, value_type=5)
         xknx.devices.async_add(sectors[sector["GUID"]]["HeightSender"])
 
         if sector["LouvreAngleAddress"] != "":
-            sectors[sector["GUID"]]["LouvreAngleSender"] = NumericValue(xknx=xknx, name=f"{sector["GUID"]}_louvre_angle", group_address=sector["LouvreAngleAddress"], respond_to_read=True, value_type=5)
+            sectors[sector["GUID"]]["LouvreAngleSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_louvre_angle", group_address=sector["LouvreAngleAddress"], respond_to_read=True, value_type=5)
         else:
-            sectors[sector["GUID"]]["LouvreAngleSender"] = NumericValue(xknx=xknx, name=f"{sector["GUID"]}_louvre_angle", group_address=None, respond_to_read=True, value_type=5)
+            sectors[sector["GUID"]]["LouvreAngleSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_louvre_angle", group_address=None, respond_to_read=True, value_type=5)
         xknx.devices.async_add(sectors[sector["GUID"]]["LouvreAngleSender"])
 
         if sector["SunBoolAddress"] != "":
-            sectors[sector["GUID"]]["SunBoolSender"] = Switch(xknx=xknx, name=f"{sector["GUID"]}_sun_bool", group_address=sector["SunBoolAddress"], respond_to_read=True)
+            sectors[sector["GUID"]]["SunBoolSender"] = Switch(xknx=xknx, name=f"{sector['GUID']}_sun_bool", group_address=sector["SunBoolAddress"], respond_to_read=True)
         else:
             print(f"Warning: Sector {sector['GUID']} has no SunBoolAddress defined. Sun state will not be sent to KNX for this sector.")
-            sectors[sector["GUID"]]["SunBoolSender"] = Switch(xknx=xknx, name=f"{sector["GUID"]}_sun_bool", group_address=None, respond_to_read=True)
+            sectors[sector["GUID"]]["SunBoolSender"] = Switch(xknx=xknx, name=f"{sector['GUID']}_sun_bool", group_address=None, respond_to_read=True)
         xknx.devices.async_add(sectors[sector["GUID"]]["SunBoolSender"])
 
 
