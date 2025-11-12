@@ -12,6 +12,7 @@ loop_count = 10000
 lps = 0
 
 sectors = {}
+sectors_lock = threading.Lock()
 
 for sector in configuration.sectors:
     sectors[sector["GUID"]] = {}
@@ -30,11 +31,13 @@ def calculate_lps():
 
 
 def set_brightness_state(guid, state):
-    sectors[guid]["brightness_state"] = state
+    with sectors_lock:
+        sectors[guid]["brightness_state"] = state
     if configuration.Debug: print(f"Sector {guid} brightness state set to {state}")
 
 def set_irradiance_state(guid, state):
-    sectors[guid]["irradiance_state"] = state
+    with sectors_lock:
+        sectors[guid]["irradiance_state"] = state
     if configuration.Debug: print(f"Sector {guid} irradiance state set to {state}")
 
 
@@ -44,24 +47,32 @@ def start(loop):
     global loop_count
     calculate_lps()
     for sector in configuration.sectors:
+        guid = sector["GUID"]
+
         if sector["HeightAddress"] != "":
-            sectors[sector["GUID"]]["HeightSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_height", group_address=sector["HeightAddress"], respond_to_read=True, value_type=5)
+            height_sender = NumericValue(xknx=xknx, name=f"{guid}_height", group_address=sector["HeightAddress"], respond_to_read=True, value_type=5)
         else:
-            sectors[sector["GUID"]]["HeightSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_height", group_address=None, respond_to_read=True, value_type=5)
-        xknx.devices.async_add(sectors[sector["GUID"]]["HeightSender"])
+            height_sender = NumericValue(xknx=xknx, name=f"{guid}_height", group_address=None, respond_to_read=True, value_type=5)
+        xknx.devices.async_add(height_sender)
+        with sectors_lock:
+            sectors[guid]["HeightSender"] = height_sender
 
         if sector["LouvreAngleAddress"] != "":
-            sectors[sector["GUID"]]["LouvreAngleSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_louvre_angle", group_address=sector["LouvreAngleAddress"], respond_to_read=True, value_type=5)
+            louvre_sender = NumericValue(xknx=xknx, name=f"{guid}_louvre_angle", group_address=sector["LouvreAngleAddress"], respond_to_read=True, value_type=5)
         else:
-            sectors[sector["GUID"]]["LouvreAngleSender"] = NumericValue(xknx=xknx, name=f"{sector['GUID']}_louvre_angle", group_address=None, respond_to_read=True, value_type=5)
-        xknx.devices.async_add(sectors[sector["GUID"]]["LouvreAngleSender"])
+            louvre_sender = NumericValue(xknx=xknx, name=f"{guid}_louvre_angle", group_address=None, respond_to_read=True, value_type=5)
+        xknx.devices.async_add(louvre_sender)
+        with sectors_lock:
+            sectors[guid]["LouvreAngleSender"] = louvre_sender
 
         if sector["SunBoolAddress"] != "":
-            sectors[sector["GUID"]]["SunBoolSender"] = Switch(xknx=xknx, name=f"{sector['GUID']}_sun_bool", group_address=sector["SunBoolAddress"], respond_to_read=True)
+            sun_bool_sender = Switch(xknx=xknx, name=f"{guid}_sun_bool", group_address=sector["SunBoolAddress"], respond_to_read=True)
         else:
             print(f"Warning: Sector {sector['GUID']} has no SunBoolAddress defined. Sun state will not be sent to KNX for this sector.")
-            sectors[sector["GUID"]]["SunBoolSender"] = Switch(xknx=xknx, name=f"{sector['GUID']}_sun_bool", group_address=None, respond_to_read=True)
-        xknx.devices.async_add(sectors[sector["GUID"]]["SunBoolSender"])
+            sun_bool_sender = Switch(xknx=xknx, name=f"{guid}_sun_bool", group_address=None, respond_to_read=True)
+        xknx.devices.async_add(sun_bool_sender)
+        with sectors_lock:
+            sectors[guid]["SunBoolSender"] = sun_bool_sender
 
 
     while True:
@@ -69,19 +80,31 @@ def start(loop):
         if configuration.az_el_option != "BusAzEl":
             sun.calculate_solar_position()
         for sector in configuration.sectors:
+            guid = sector["GUID"]
+            with sectors_lock:
+                sector_state = sectors[guid]
+                brightness_state = sector_state.get("brightness_state", 1)
+                irradiance_state = sector_state.get("irradiance_state", 1)
+                mode_state = sector_state.get("Mode")
+                sun_bool_sender = sector_state.get("SunBoolSender")
+                height_sender = sector_state.get("HeightSender")
+                louvre_sender = sector_state.get("LouvreAngleSender")
+
             relative_azimuth = (sun.current_azimuth - sector["Orientation"])
             if relative_azimuth > 180:
                 relative_azimuth = relative_azimuth - 360
+            brightness_active = brightness_state == 4
+            irradiance_active = irradiance_state == 4
             if sector["UseBrightness"]:
                 if sector["UseIrradiance"]:
                     if sector["BrightnessIrradianceLink"] == "And":
-                        sun_state = (sectors[sector["GUID"]].get("brightness_state", 1) == 4 and sectors[sector["GUID"]].get("irradiance_state", 1) == 4 and sectors[sector["GUID"]].get("Mode") == "Auto") or (sectors[sector["GUID"]].get("Mode") == "On")
+                        sun_state = (brightness_active and irradiance_active and mode_state == "Auto") or (mode_state == "On")
                     else:
-                        sun_state = ((sectors[sector["GUID"]].get("brightness_state", 1) == 4 or sectors[sector["GUID"]].get("irradiance_state", 1) == 4) and sectors[sector["GUID"]].get("Mode") == "Auto") or (sectors[sector["GUID"]].get("Mode") == "On")
+                        sun_state = ((brightness_active or irradiance_active) and mode_state == "Auto") or (mode_state == "On")
                 else:
-                    sun_state = (sectors[sector["GUID"]].get("brightness_state", 1) == 4 and sectors[sector["GUID"]].get("Mode") == "Auto") or (sectors[sector["GUID"]].get("Mode") == "On")
+                    sun_state = (brightness_active and mode_state == "Auto") or (mode_state == "On")
             else:
-                sun_state = (sectors[sector["GUID"]].get("irradiance_state", 1) == 4 and sectors[sector["GUID"]].get("Mode") == "Auto") or (sectors[sector["GUID"]].get("Mode") == "On")
+                sun_state = (irradiance_active and mode_state == "Auto") or (mode_state == "On")
             
             # Sun shines on facade check
             if sun_state and (not (relative_azimuth >= -90 and relative_azimuth <= 90)) and sun.current_elevation >= 0:
@@ -93,20 +116,29 @@ def start(loop):
                     sun_state = False
 
             #Send KNX updates if state changed
-            if sun_state != sectors[sector["GUID"]].get("sun_state", None):
-                sectors[sector["GUID"]]["sun_state"] = sun_state
+            state_changed = False
+            with sectors_lock:
+                current_state = sectors[guid].get("sun_state", None)
+                if sun_state != current_state:
+                    sectors[guid]["sun_state"] = sun_state
+                    state_changed = True
+
+            if state_changed:
                 print(f"Sector {sector['GUID']} sun state changed to {'On' if sun_state else 'Off'}")
                 if sun_state:
-                    future = asyncio.run_coroutine_threadsafe(sectors[sector["GUID"]]["SunBoolSender"].set_on(), loop)
-                    future.result()
-                    future = asyncio.run_coroutine_threadsafe(sectors[sector["GUID"]]["HeightSender"].set(255), loop)
-                    future.result()
+                    if sun_bool_sender:
+                        future = asyncio.run_coroutine_threadsafe(sun_bool_sender.set_on(), loop)
+                        future.result()
+                    if height_sender:
+                        future = asyncio.run_coroutine_threadsafe(height_sender.set(255), loop)
+                        future.result()
                 else:
-                    future = asyncio.run_coroutine_threadsafe(sectors[sector["GUID"]]["SunBoolSender"].set_off(), loop)
-                    future.result()
+                    if sun_bool_sender:
+                        future = asyncio.run_coroutine_threadsafe(sun_bool_sender.set_off(), loop)
+                        future.result()
 
             # Louvre tracking
-            elif sector["LouvreTracking"] and sun_state:
+            elif sector["LouvreTracking"] and sun_state and louvre_sender:
                 angle_deg = louvre_angle_calculation(sector["LouvreSpacing"], sector["LouvreDepth"], relative_azimuth, sun.current_elevation)
                 # Map calculated angle (degrees) to 0-100% between sector-defined zero and hundred angles,
                 # then convert that percent to the device value (0-255) expected by NumericValue (value_type=5).
@@ -118,14 +150,18 @@ def start(loop):
                 else:
                     angle_percent = (angle_deg - zero_deg) / span * 100.0
 
-
-                if sectors[sector["GUID"]].get("angle_deg", 0) < angle_deg:
-                    sectors[sector["GUID"]]["angle_direction"] = "opening"
-                elif sectors[sector["GUID"]].get("angle_deg", 0) > angle_deg:
-                    sectors[sector["GUID"]]["angle_direction"] = "closing"
-                sectors[sector["GUID"]]["angle_deg"] = angle_deg
+                with sectors_lock:
+                    previous_angle_deg = sectors[guid].get("angle_deg", 0)
+                    if previous_angle_deg < angle_deg:
+                        angle_direction = "opening"
+                    elif previous_angle_deg > angle_deg:
+                        angle_direction = "closing"
+                    else:
+                        angle_direction = sectors[guid].get("angle_direction", "closing")
+                    sectors[guid]["angle_direction"] = angle_direction
+                    sectors[guid]["angle_deg"] = angle_deg
                 
-                if sectors[sector["GUID"]].get("angle_direction", "closing") == "opening":
+                if angle_direction == "opening":
                     angle_percent = angle_percent + sector.get("LouvreBuffer", 0)
                 else:
                     angle_percent = angle_percent + sector.get("LouvreBuffer", 0) + sector.get("LouvreMinimumChange", 1)
@@ -135,9 +171,15 @@ def start(loop):
                 # convert percent (0-100) to 0-255 for the NumericValue device
                 angle_bytes = int(round(angle_percent * 255.0 / 100.0))
 
-                if abs(sectors[sector["GUID"]].get("angle_bytes_sent", 180) - angle_bytes) >= sector.get("LouvreMinimumChange", 1):    
-                    sectors[sector["GUID"]]["angle_bytes_sent"] = angle_bytes
-                    future = asyncio.run_coroutine_threadsafe(sectors[sector["GUID"]]["LouvreAngleSender"].set(angle_bytes), loop)
+                should_send_angle = False
+                with sectors_lock:
+                    last_angle_bytes = sectors[guid].get("angle_bytes_sent", 180)
+                    if abs(last_angle_bytes - angle_bytes) >= sector.get("LouvreMinimumChange", 1):
+                        sectors[guid]["angle_bytes_sent"] = angle_bytes
+                        should_send_angle = True
+
+                if should_send_angle:
+                    future = asyncio.run_coroutine_threadsafe(louvre_sender.set(angle_bytes), loop)
                     future.result()
                     print(f"Sector {sector['GUID']} louvre angle deg={angle_deg:.2f} => {angle_percent:.1f}% => bytes={angle_bytes}")
         time.sleep(0.001)

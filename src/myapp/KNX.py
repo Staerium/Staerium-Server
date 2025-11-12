@@ -130,21 +130,23 @@ def telegram_received(telegram):
                 print(f"Error decoding telegram payload: {e}")
                 return
             print(f"Brightness from bus for {sector['Name']}: {val} Lux")
-            SectorRunner.sectors[sector["GUID"]]["Brightness"] = val
-            if val > sector["BrightnessUpperThreshold"] and SectorRunner.sectors[sector["GUID"]].get("brightness_state", 1) == 1:
-                SectorRunner.sectors[sector["GUID"]]["brightness_state"] = 3
-                SectorRunner.sectors[sector["GUID"]]["brightness_timer_on"] = threading.Timer(sector["BrightnessUpperDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"],4))
-                SectorRunner.sectors[sector["GUID"]]["brightness_timer_on"].start()
-            elif val > sector["BrightnessUpperThreshold"] and SectorRunner.sectors[sector["GUID"]].get("brightness_state", 1) == 2:
-                SectorRunner.sectors[sector["GUID"]]["brightness_state"] = 4
-                SectorRunner.sectors[sector["GUID"]]["brightness_timer_off"].cancel()
-            elif val < sector["BrightnessLowerThreshold"] and SectorRunner.sectors[sector["GUID"]].get("brightness_state", 1) == 3:
-                SectorRunner.sectors[sector["GUID"]]["brightness_state"] = 1
-                SectorRunner.sectors[sector["GUID"]]["brightness_timer_on"].cancel()
-            elif val < sector["BrightnessLowerThreshold"] and SectorRunner.sectors[sector["GUID"]].get("brightness_state", 1) == 4:
-                SectorRunner.sectors[sector["GUID"]]["brightness_state"] = 2
-                SectorRunner.sectors[sector["GUID"]]["brightness_timer_off"] = threading.Timer(sector["BrightnessLowerDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"],1))
-                SectorRunner.sectors[sector["GUID"]]["brightness_timer_off"].start()
+            with SectorRunner.sectors_lock:
+                sector_state = SectorRunner.sectors[sector["GUID"]]
+                sector_state["Brightness"] = val
+                if val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 1:
+                    sector_state["brightness_state"] = 3
+                    sector_state["brightness_timer_on"] = threading.Timer(sector["BrightnessUpperDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 4))
+                    sector_state["brightness_timer_on"].start()
+                elif val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 2:
+                    sector_state["brightness_state"] = 4
+                    sector_state["brightness_timer_off"].cancel()
+                elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 3:
+                    sector_state["brightness_state"] = 1
+                    sector_state["brightness_timer_on"].cancel()
+                elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 4:
+                    sector_state["brightness_state"] = 2
+                    sector_state["brightness_timer_off"] = threading.Timer(sector["BrightnessLowerDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 1))
+                    sector_state["brightness_timer_off"].start()
 
         if str(telegram.destination_address) == sector["IrradianceAddress"] and sector["UseIrradiance"]:
             try:
@@ -153,21 +155,23 @@ def telegram_received(telegram):
                 print(f"Error decoding telegram payload: {e}")
                 return
             print(f"Irradiance from bus for {sector['Name']}: {val} Lux")
-            SectorRunner.sectors[sector["GUID"]]["Irradiance"] = val
-            if val > sector["IrradianceUpperThreshold"] and SectorRunner.sectors[sector["GUID"]].get("irradiance_state", 1) == 1:
-                SectorRunner.sectors[sector["GUID"]]["irradiance_state"] = 3
-                SectorRunner.sectors[sector["GUID"]]["irradiance_timer_on"] = threading.Timer(sector["IrradianceUpperDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"],4))
-                SectorRunner.sectors[sector["GUID"]]["irradiance_timer_on"].start()
-            elif val > sector["IrradianceUpperThreshold"] and SectorRunner.sectors[sector["GUID"]].get("irradiance_state", 1) == 2:
-                SectorRunner.sectors[sector["GUID"]]["irradiance_state"] = 4
-                SectorRunner.sectors[sector["GUID"]]["irradiance_timer_off"].cancel()
-            elif val < sector["IrradianceLowerThreshold"] and SectorRunner.sectors[sector["GUID"]].get("irradiance_state", 1) == 3:
-                SectorRunner.sectors[sector["GUID"]]["irradiance_state"] = 1
-                SectorRunner.sectors[sector["GUID"]]["irradiance_timer_on"].cancel()
-            elif val < sector["IrradianceLowerThreshold"] and SectorRunner.sectors[sector["GUID"]].get("irradiance_state", 1) == 4:
-                SectorRunner.sectors[sector["GUID"]]["irradiance_state"] = 2
-                SectorRunner.sectors[sector["GUID"]]["irradiance_timer_off"] = threading.Timer(sector["IrradianceLowerDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"],1))
-                SectorRunner.sectors[sector["GUID"]]["irradiance_timer_off"].start()
+            with SectorRunner.sectors_lock:
+                sector_state = SectorRunner.sectors[sector["GUID"]]
+                sector_state["Irradiance"] = val
+                if val > sector["IrradianceUpperThreshold"] and sector_state.get("irradiance_state", 1) == 1:
+                    sector_state["irradiance_state"] = 3
+                    sector_state["irradiance_timer_on"] = threading.Timer(sector["IrradianceUpperDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"], 4))
+                    sector_state["irradiance_timer_on"].start()
+                elif val > sector["IrradianceUpperThreshold"] and sector_state.get("irradiance_state", 1) == 2:
+                    sector_state["irradiance_state"] = 4
+                    sector_state["irradiance_timer_off"].cancel()
+                elif val < sector["IrradianceLowerThreshold"] and sector_state.get("irradiance_state", 1) == 3:
+                    sector_state["irradiance_state"] = 1
+                    sector_state["irradiance_timer_on"].cancel()
+                elif val < sector["IrradianceLowerThreshold"] and sector_state.get("irradiance_state", 1) == 4:
+                    sector_state["irradiance_state"] = 2
+                    sector_state["irradiance_timer_off"] = threading.Timer(sector["IrradianceLowerDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"], 1))
+                    sector_state["irradiance_timer_off"].start()
         
         if str(telegram.destination_address) == sector["OnAutoAddress"]:
             try:
@@ -180,7 +184,8 @@ def telegram_received(telegram):
             else:
                 mode = not val
             if configuration.Debug: print(f"Sector {sector['Name']} set to {'Auto' if mode else 'On'} mode from bus")
-            SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "On"
+            with SectorRunner.sectors_lock:
+                SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "On"
 
         if str(telegram.destination_address) == sector["OffAutoAddress"]:
             try:
@@ -192,5 +197,6 @@ def telegram_received(telegram):
                 mode = val
             else:
                 mode = not val
-            if configuration.Debug: print(f"Sector {sector["Name"]} set to {"Auto" if mode else "Off"} mode from bus")
-            SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "Off"
+            if configuration.Debug: print(f"Sector {sector['Name']} set to {'Auto' if mode else 'Off'} mode from bus")
+            with SectorRunner.sectors_lock:
+                SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "Off"

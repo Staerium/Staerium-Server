@@ -3,7 +3,7 @@
   <Version>0.8.0</Version>
   <Latitude>47.377672</Latitude>
   <Longitude>8.518703</Longitude>
-  <AzElOption>Internet</AzElOption>
+  <AzElOption>BusAzEl</AzElOption>
   <TimeAddress></TimeAddress>
   <DateAddress></DateAddress>
   <AzimuthAddress>1/0/2</AzimuthAddress>
@@ -193,21 +193,21 @@
         <Command>
           <Type>1bit</Type>
           <Weekdays>127</Weekdays>
-          <Time>17:52</Time>
+          <Time>20:43</Time>
           <Value>1</Value>
           <GroupAddress>1/2/3</GroupAddress>
         </Command>
         <Command>
           <Type>1byte</Type>
           <Weekdays>4</Weekdays>
-          <Time>17:53</Time>
+          <Time>20:43</Time>
           <Value>71</Value>
           <GroupAddress>1/2/4</GroupAddress>
         </Command>
         <Command>
           <Type>1byte</Type>
           <Weekdays>8</Weekdays>
-          <Time>17:53</Time>
+          <Time>20:43</Time>
           <Value>155</Value>
           <GroupAddress>1/2/5</GroupAddress>
         </Command>
@@ -220,21 +220,21 @@
         <Command>
           <Type>1bit</Type>
           <Weekdays>127</Weekdays>
-          <Time>17:51</Time>
+          <Time>20:43</Time>
           <Value>1</Value>
           <GroupAddress>1/3/1</GroupAddress>
         </Command>
         <Command>
           <Type>1bit</Type>
           <Weekdays>4</Weekdays>
-          <Time>17:51</Time>
+          <Time>20:43</Time>
           <Value>0</Value>
           <GroupAddress>1/3/1</GroupAddress>
         </Command>
         <Command>
           <Type>1bit</Type>
           <Weekdays>4</Weekdays>
-          <Time>19:50</Time>
+          <Time>20:43</Time>
           <Value>1</Value>
           <GroupAddress>1/3/3</GroupAddress>
         </Command>

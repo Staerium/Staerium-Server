@@ -237,12 +237,8 @@ def _dispatch_command(entry, loop, timestamp):
         elif entry["type"] == "1byte":
             future = asyncio.run_coroutine_threadsafe(device.set(entry["value"]), loop)
         future.result()
-
-        if configuration.Debug:
-            print(
-                f"Time program '{entry['program']}' wrote {entry['value']} "
-                f"to {entry['group_address']} at {timestamp.isoformat()}"
-            )
+        print(f"Time program '{entry['program']}' wrote {entry['value']} "f"to {entry['group_address']} at {timestamp.isoformat()}")
+        
     except Exception as exc:  # pragma: no cover - transport errors are environment dependent
         print(
             f"Failed to execute time program '{entry['program']}' "
