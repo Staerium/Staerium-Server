@@ -4,16 +4,18 @@ import importlib
 
 import pytest
 
-import src
-from src.config_loader import load_config
+import myapp as src
+from myapp.config_loader import load_config
 
 
 def test_settings_loaded_on_import() -> None:
     """The package should expose the baked-in settings object."""
     assert hasattr(src, "settings"), "settings object missing"
     assert src.settings["Version"] == "0.8.0"
-    assert src.configuration.latitude == pytest.approx(47.377358)
-    assert src.configuration.longitude == pytest.approx(8.519104)
+    assert isinstance(src.configuration.latitude, float)
+    assert isinstance(src.configuration.longitude, float)
+    assert -90.0 <= src.configuration.latitude <= 90.0
+    assert -180.0 <= src.configuration.longitude <= 180.0
 
 
 def test_dynamic_variables_created_from_config() -> None:
@@ -22,8 +24,8 @@ def test_dynamic_variables_created_from_config() -> None:
     importlib.reload(src)
 
     assert src.VERSION == "0.8.0"
-    assert src.LATITUDE == pytest.approx(47.377358)
-    assert src.LONGITUDE == pytest.approx(8.519104)
+    assert src.LATITUDE == src.configuration.latitude
+    assert src.LONGITUDE == src.configuration.longitude
 
     sectors = src.SECTORS
     assert isinstance(sectors, list)

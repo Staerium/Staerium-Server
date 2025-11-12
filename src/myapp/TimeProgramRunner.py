@@ -9,7 +9,6 @@ from . import SectorRunner, configuration, sun
 
 
 def start(loop):
-    print("Starting TimeProgramRunner...")
     timezone = pytz.timezone(sun.tz)
     scheduled_commands = _build_schedule(timezone)
     if not scheduled_commands:

@@ -59,6 +59,7 @@ async def connect_knx() -> Any:
         ) from exc
 
     if connection_type in {ConnectionType.TUNNELING, ConnectionType.TUNNELING_TCP}:
+        print(f"Connecting to KNX gateway at {configuration.knx_gateway_ip}:{configuration.knx_gateway_port} ...")
         connection_config = ConnectionConfig(
             connection_type=connection_type,
             individual_address=configuration.knx_individual_address,
@@ -71,6 +72,7 @@ async def connect_knx() -> Any:
             auto_reconnect_wait=configuration.knx_auto_reconnect_wait,
         )
     else:
+        print(f"Connecting to KNX gateway at {configuration.knx_multicast_group}:{configuration.knx_multicast_port} ...")
         connection_config = ConnectionConfig(
             connection_type=connection_type,
             individual_address=configuration.knx_individual_address,
@@ -106,16 +108,23 @@ async def _async_main() -> None:
     print(f"Server IP (KNX communication): {configuration.ip_address_knx}")
     print(f"Server IP (Internet communication): {configuration.ip_address_internet}")
     # TODO: Print IP for API
-    print(f"Connecting to KNX gateway at {configuration.knx_gateway_ip}:{configuration.knx_gateway_port} ...")
 
-    knx = await connect_knx()
-    print("Connected to KNX gateway.")
-
-    # Check if Time is correct (Check with NTP)
-    if configuration.az_el_option == "Internet":
-        await check_time.check_system_time(threshold_seconds=60)
-
+    knx: XKNX | None = None
     try:
+        knx = await connect_knx()
+        if knx is None:
+            print(
+                "Unable to establish a KNX connection. "
+                "Please verify the gateway settings and try again."
+            )
+            return
+
+        print("Connected to KNX gateway.")
+
+        # Check if Time is correct (Check with NTP)
+        if configuration.az_el_option == "Internet":
+            await check_time.check_system_time(threshold_seconds=60)
+
         # Start SectorRunner in background so it doesn't block the event loop.
         loop = asyncio.get_running_loop()
         threading.Thread(name='SectorRunner', args=(loop,), target=SectorRunner.start).start()
@@ -126,8 +135,9 @@ async def _async_main() -> None:
         except asyncio.CancelledError:
             pass
     finally:
-        await knx.stop()
-        print("KNX connection closed.")
+        if knx is not None:
+            await knx.stop()
+            print("KNX connection closed.")
 
 
 def main() -> None:

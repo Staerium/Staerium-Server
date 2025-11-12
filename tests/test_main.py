@@ -8,13 +8,13 @@ import sys
 
 import pytest
 
-sys.modules.setdefault("configuration", importlib.import_module("src.configuration"))
-sys.modules.setdefault("sun", importlib.import_module("src.sun"))
-sys.modules.setdefault("SectorRunner", importlib.import_module("src.SectorRunner"))
-sys.modules.setdefault("KNX", importlib.import_module("src.KNX"))
-sys.modules.setdefault("check_time", importlib.import_module("src.check_time"))
+sys.modules.setdefault("configuration", importlib.import_module("myapp.configuration"))
+sys.modules.setdefault("sun", importlib.import_module("myapp.sun"))
+sys.modules.setdefault("SectorRunner", importlib.import_module("myapp.SectorRunner"))
+sys.modules.setdefault("KNX", importlib.import_module("myapp.KNX"))
+sys.modules.setdefault("check_time", importlib.import_module("myapp.check_time"))
 
-import src.main as main_module
+import myapp.main as main_module
 
 
 def test_get_local_ip_handles_errors(monkeypatch) -> None:

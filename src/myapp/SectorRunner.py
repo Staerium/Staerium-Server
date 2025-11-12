@@ -1,6 +1,7 @@
 from xknx.devices import NumericValue, Switch
 import asyncio
 import math
+import time
 
 from . import configuration, sun
 import threading
@@ -139,6 +140,7 @@ def start(loop):
                     future = asyncio.run_coroutine_threadsafe(sectors[sector["GUID"]]["LouvreAngleSender"].set(angle_bytes), loop)
                     future.result()
                     print(f"Sector {sector['GUID']} louvre angle deg={angle_deg:.2f} => {angle_percent:.1f}% => bytes={angle_bytes}")
+        time.sleep(0.001)
 
 
 def horizon_limit_check(sector, relative_azimuth, current_elevation):
