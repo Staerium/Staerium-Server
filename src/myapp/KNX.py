@@ -135,7 +135,7 @@ def telegram_received(telegram):
                 sector_state["Brightness"] = val
                 if val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 1:
                     sector_state["brightness_state"] = 3
-                    sector_state["brightness_timer_on"] = threading.Timer(sector["BrightnessUpperDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 4))
+                    sector_state["brightness_timer_on"] = threading.Timer(sector["BrightnessUpperDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 4), daemon=True)
                     sector_state["brightness_timer_on"].start()
                 elif val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 2:
                     sector_state["brightness_state"] = 4
@@ -145,7 +145,7 @@ def telegram_received(telegram):
                     sector_state["brightness_timer_on"].cancel()
                 elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 4:
                     sector_state["brightness_state"] = 2
-                    sector_state["brightness_timer_off"] = threading.Timer(sector["BrightnessLowerDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 1))
+                    sector_state["brightness_timer_off"] = threading.Timer(sector["BrightnessLowerDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 1), daemon=True)
                     sector_state["brightness_timer_off"].start()
 
         if str(telegram.destination_address) == sector["IrradianceAddress"] and sector["UseIrradiance"]:

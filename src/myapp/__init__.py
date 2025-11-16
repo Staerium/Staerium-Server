@@ -1,4 +1,4 @@
-"""Staerium Python project package with baked-in defaults."""
+"""Staerium Python project package initializer."""
 
 from __future__ import annotations
 

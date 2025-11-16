@@ -1,4 +1,4 @@
-"""Entry point for Staerium experiments."""
+"""Entry point for Staerium Server application."""
 
 from __future__ import annotations
 
@@ -127,8 +127,10 @@ async def _async_main() -> None:
 
         # Start SectorRunner in background so it doesn't block the event loop.
         loop = asyncio.get_running_loop()
-        threading.Thread(name='SectorRunner', args=(loop,), target=SectorRunner.start).start()
-        threading.Thread(name='TimeProgramRunner', args=(loop,), target=TimeProgramRunner.start).start()
+        SectorRunnerThread = threading.Thread(name='SectorRunner', args=(loop,), target=SectorRunner.start, daemon=True)
+        SectorRunnerThread.start()
+        TimeProgramRunnerThread = threading.Thread(name='TimeProgramRunner', args=(loop,), target=TimeProgramRunner.start, daemon=True)
+        TimeProgramRunnerThread.start()
         print("Welcome to Staerium Server!")
         try:
             await asyncio.Future()
