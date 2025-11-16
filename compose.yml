@@ -1,9 +1,8 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: python-docker-app:latest
+    image: ericstaedler/staerium-server:latest
     environment:
       - APP_NAME=StaeriumServer
+    volumes:
+      - ./configuration.sunproj:/app/src/myapp/config.xml:ro
     restart: unless-stopped

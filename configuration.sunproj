@@ -1,118 +1,134 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Konfiguration>
   <Version>0.8.0</Version>
-  <Latitude>47.377358</Latitude>
-  <Longitude>8.519104</Longitude>
-  <AzElOption>Internet</AzElOption>
-  <TimeAddress>1/0/0</TimeAddress>
-  <DateAddress>1/0/1</DateAddress>
+  <Latitude>47.377672</Latitude>
+  <Longitude>8.518703</Longitude>
+  <AzElOption>BusAzEl</AzElOption>
+  <TimeAddress></TimeAddress>
+  <DateAddress></DateAddress>
   <AzimuthAddress>1/0/2</AzimuthAddress>
   <ElevationAddress>1/0/3</ElevationAddress>
+  <AzimuthDPT>14.007</AzimuthDPT>
+  <ElevationDPT>14.007</ElevationDPT>
   <AzElTimezone>Europe/Zurich</AzElTimezone>
   <KnxConnectionType>ROUTING</KnxConnectionType>
   <KnxIndividualAddress>15.15.255</KnxIndividualAddress>
-  <KnxGatewayIp>10.0.0.51</KnxGatewayIp>
+  <KnxGatewayIp>10.10.10.10</KnxGatewayIp>
   <KnxGatewayPort>3671</KnxGatewayPort>
   <KnxMulticastGroup>224.0.23.12</KnxMulticastGroup>
   <KnxMulticastPort>3671</KnxMulticastPort>
-  <KnxAutoReconnect>true</KnxAutoReconnect>
+  <KnxAutoReconnect>false</KnxAutoReconnect>
   <KnxAutoReconnectWait>5</KnxAutoReconnectWait>
   <Sectors>
     <Sector>
       <GUID>00247f60-ed21-4bc8-9ca7-48ddc290042a</GUID>
       <Name>Sektor 1</Name>
-      <Orientation>180.0</Orientation>
+      <Orientation>180</Orientation>
       <HorizonLimit>true</HorizonLimit>
       <LouvreTracking>true</LouvreTracking>
-      <LouvreSpacing>100.0</LouvreSpacing>
-      <LouvreDepth>100.0</LouvreDepth>
-      <LouvreAngleAtZero>90.0</LouvreAngleAtZero>
-      <LouvreAngleAtHundred>0.0</LouvreAngleAtHundred>
-      <LouvreMinimumChange>20.0</LouvreMinimumChange>
-      <LouvreBuffer>5.0</LouvreBuffer>
+      <LouvreSpacing>70</LouvreSpacing>
+      <LouvreDepth>80</LouvreDepth>
+      <LouvreAngleAtZero>90</LouvreAngleAtZero>
+      <LouvreAngleAtHundred>3</LouvreAngleAtHundred>
+      <LouvreMinimumChange>20</LouvreMinimumChange>
+      <LouvreBuffer>5</LouvreBuffer>
       <UseBrightness>true</UseBrightness>
       <UseIrradiance>true</UseIrradiance>
       <BrightnessAddress>2/0/0</BrightnessAddress>
+      <HeightAddress>2/0/6</HeightAddress>
       <LouvreAngleAddress>2/0/2</LouvreAngleAddress>
       <SunBoolAddress>2/0/3</SunBoolAddress>
       <BrightnessUpperThreshold>100000</BrightnessUpperThreshold>
-      <BrightnessUpperDelay>10</BrightnessUpperDelay>
+      <BrightnessUpperDelay>30</BrightnessUpperDelay>
       <BrightnessLowerThreshold>90000</BrightnessLowerThreshold>
-      <BrightnessLowerDelay>20</BrightnessLowerDelay>
+      <BrightnessLowerDelay>60</BrightnessLowerDelay>
       <IrradianceAddress>2/0/1</IrradianceAddress>
-      <IrradianceUpperThreshold></IrradianceUpperThreshold>
-      <IrradianceUpperDelay></IrradianceUpperDelay>
-      <IrradianceLowerThreshold></IrradianceLowerThreshold>
-      <IrradianceLowerDelay></IrradianceLowerDelay>
-      <BrightnessIrradianceLink>Und</BrightnessIrradianceLink>
+      <IrradianceUpperThreshold>200</IrradianceUpperThreshold>
+      <IrradianceUpperDelay>10</IrradianceUpperDelay>
+      <IrradianceLowerThreshold>100</IrradianceLowerThreshold>
+      <IrradianceLowerDelay>20</IrradianceLowerDelay>
+      <BrightnessIrradianceLink>And</BrightnessIrradianceLink>
       <OnAutoAddress>2/0/4</OnAutoAddress>
-      <OnAutoBehavior>On</OnAutoBehavior>
+      <OnAutoBehavior>Auto</OnAutoBehavior>
       <OffAutoAddress>2/0/5</OffAutoAddress>
-      <OffAutoBehavior>Off</OffAutoBehavior>
+      <OffAutoBehavior>Auto</OffAutoBehavior>
       <FacadeAddress></FacadeAddress>
       <FacadeStart></FacadeStart>
       <FacadeEnd></FacadeEnd>
       <HorizonPoints>
         <Point>
-          <X>-90.0</X>
-          <Y>90.0</Y>
+          <X>-90</X>
+          <Y>30</Y>
         </Point>
         <Point>
-          <X>0.0</X>
-          <Y>90.0</Y>
+          <X>-50</X>
+          <Y>30</Y>
         </Point>
         <Point>
-          <X>30.0</X>
-          <Y>20.0</Y>
+          <X>-50</X>
+          <Y>50</Y>
         </Point>
         <Point>
-          <X>50.0</X>
-          <Y>60.0</Y>
+          <X>0</X>
+          <Y>60</Y>
         </Point>
         <Point>
-          <X>90.0</X>
-          <Y>90.0</Y>
+          <X>0</X>
+          <Y>30</Y>
+        </Point>
+        <Point>
+          <X>30</X>
+          <Y>40</Y>
+        </Point>
+        <Point>
+          <X>50</X>
+          <Y>30</Y>
+        </Point>
+        <Point>
+          <X>70</X>
+          <Y>30</Y>
+        </Point>
+        <Point>
+          <X>89</X>
+          <Y>30</Y>
+        </Point>
+        <Point>
+          <X>90</X>
+          <Y>90</Y>
         </Point>
       </HorizonPoints>
       <CeilingPoints>
         <Point>
-          <X>-90.0</X>
-          <Y>0.0</Y>
+          <X>-90</X>
+          <Y>90</Y>
         </Point>
         <Point>
-          <X>0.0</X>
-          <Y>0.0</Y>
+          <X>30</X>
+          <Y>30</Y>
         </Point>
         <Point>
-          <X>90.0</X>
-          <Y>20.0</Y>
-        </Point>
-        <Point>
-          <X>90.0</X>
-          <Y>30.0</Y>
-        </Point>
-        <Point>
-          <X>90.0</X>
-          <Y>0.0</Y>
+          <X>90</X>
+          <Y>90</Y>
         </Point>
       </CeilingPoints>
     </Sector>
     <Sector>
       <GUID>67609431-421a-4614-b638-d144db864348</GUID>
       <Name>Sektor 2</Name>
-      <Orientation>90.0</Orientation>
+      <Orientation>90</Orientation>
       <HorizonLimit>false</HorizonLimit>
       <LouvreTracking>false</LouvreTracking>
-      <LouvreSpacing>0.0</LouvreSpacing>
-      <LouvreDepth>0.0</LouvreDepth>
-      <LouvreAngleAtZero>90.0</LouvreAngleAtZero>
-      <LouvreAngleAtHundred>0.0</LouvreAngleAtHundred>
-      <LouvreMinimumChange>20.0</LouvreMinimumChange>
-      <LouvreBuffer>5.0</LouvreBuffer>
+      <LouvreSpacing>0</LouvreSpacing>
+      <LouvreDepth>0</LouvreDepth>
+      <LouvreAngleAtZero>90</LouvreAngleAtZero>
+      <LouvreAngleAtHundred>0</LouvreAngleAtHundred>
+      <LouvreMinimumChange>20</LouvreMinimumChange>
+      <LouvreBuffer>5</LouvreBuffer>
       <UseBrightness>true</UseBrightness>
       <UseIrradiance>true</UseIrradiance>
       <BrightnessAddress>2/1/0</BrightnessAddress>
-      <LouvreAngleAddress>2/1/2</LouvreAngleAddress>
+      <HeightAddress>2/1/6</HeightAddress>
+      <LouvreAngleAddress>3/4/5</LouvreAngleAddress>
       <SunBoolAddress>2/1/3</SunBoolAddress>
       <BrightnessUpperThreshold>30</BrightnessUpperThreshold>
       <BrightnessUpperDelay>20</BrightnessUpperDelay>
@@ -123,7 +139,7 @@
       <IrradianceUpperDelay>200</IrradianceUpperDelay>
       <IrradianceLowerThreshold>100</IrradianceLowerThreshold>
       <IrradianceLowerDelay>90</IrradianceLowerDelay>
-      <BrightnessIrradianceLink>Und</BrightnessIrradianceLink>
+      <BrightnessIrradianceLink>And</BrightnessIrradianceLink>
       <OnAutoAddress>2/1/4</OnAutoAddress>
       <OnAutoBehavior>Auto</OnAutoBehavior>
       <OffAutoAddress>2/1/5</OffAutoAddress>
@@ -133,38 +149,38 @@
       <FacadeEnd></FacadeEnd>
       <HorizonPoints>
         <Point>
-          <X>-90.0</X>
-          <Y>0.0</Y>
+          <X>-90</X>
+          <Y>0</Y>
         </Point>
         <Point>
-          <X>90.0</X>
-          <Y>0.0</Y>
+          <X>90</X>
+          <Y>0</Y>
         </Point>
       </HorizonPoints>
       <CeilingPoints>
         <Point>
-          <X>-90.0</X>
-          <Y>30.0</Y>
+          <X>-90</X>
+          <Y>90</Y>
         </Point>
         <Point>
-          <X>-90.0</X>
-          <Y>90.0</Y>
+          <X>-90</X>
+          <Y>30</Y>
         </Point>
         <Point>
-          <X>0.0</X>
-          <Y>0.0</Y>
+          <X>0</X>
+          <Y>0</Y>
         </Point>
         <Point>
-          <X>0.0</X>
-          <Y>0.0</Y>
+          <X>0</X>
+          <Y>0</Y>
         </Point>
         <Point>
-          <X>90.0</X>
-          <Y>90.0</Y>
+          <X>90</X>
+          <Y>90</Y>
         </Point>
         <Point>
-          <X>90.0</X>
-          <Y>90.0</Y>
+          <X>90</X>
+          <Y>90</Y>
         </Point>
       </CeilingPoints>
     </Sector>
@@ -177,21 +193,21 @@
         <Command>
           <Type>1bit</Type>
           <Weekdays>127</Weekdays>
-          <Time>08:00</Time>
+          <Time>20:43</Time>
           <Value>1</Value>
           <GroupAddress>1/2/3</GroupAddress>
         </Command>
         <Command>
           <Type>1byte</Type>
-          <Weekdays>31</Weekdays>
-          <Time>08:00</Time>
+          <Weekdays>4</Weekdays>
+          <Time>20:43</Time>
           <Value>71</Value>
           <GroupAddress>1/2/4</GroupAddress>
         </Command>
         <Command>
           <Type>1byte</Type>
-          <Weekdays>96</Weekdays>
-          <Time>08:00</Time>
+          <Weekdays>8</Weekdays>
+          <Time>20:43</Time>
           <Value>155</Value>
           <GroupAddress>1/2/5</GroupAddress>
         </Command>
@@ -203,22 +219,22 @@
       <Commands>
         <Command>
           <Type>1bit</Type>
-          <Weekdays>85</Weekdays>
-          <Time>12:30</Time>
+          <Weekdays>127</Weekdays>
+          <Time>20:43</Time>
           <Value>1</Value>
           <GroupAddress>1/3/1</GroupAddress>
         </Command>
         <Command>
           <Type>1bit</Type>
-          <Weekdays>96</Weekdays>
-          <Time>01:22</Time>
-          <Value>1</Value>
-          <GroupAddress>1/3/2</GroupAddress>
+          <Weekdays>4</Weekdays>
+          <Time>20:43</Time>
+          <Value>0</Value>
+          <GroupAddress>1/3/1</GroupAddress>
         </Command>
         <Command>
           <Type>1bit</Type>
-          <Weekdays>31</Weekdays>
-          <Time>19:50</Time>
+          <Weekdays>4</Weekdays>
+          <Time>20:43</Time>
           <Value>1</Value>
           <GroupAddress>1/3/3</GroupAddress>
         </Command>
