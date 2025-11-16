@@ -19,7 +19,9 @@ for sector in configuration.sectors:
     sectors[sector["GUID"]]["Mode"] = "Auto"
 
 def calculate_lps():
-    threading.Timer(10.0, calculate_lps).start()
+    lps_timer = threading.Timer(10.0, calculate_lps)
+    lps_timer.daemon = True
+    lps_timer.start()
     global lps 
     global loop_count
     lps = loop_count / 10

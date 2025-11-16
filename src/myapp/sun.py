@@ -15,10 +15,8 @@ if __package__ in {None, ""}:
 else:
     from . import configuration  # type: ignore
 
-if configuration.az_el_option != "BusTime":
-    tz = 'Europe/Zurich'
-else:   
-    tz = configuration.az_el_timezone
+
+tz = configuration.az_el_timezone
 
 site = Location(configuration.latitude, configuration.longitude, tz=tz)
 
@@ -37,7 +35,7 @@ def calculate_solar_position():
     if configuration.az_el_option == "Internet":
         times = DatetimeIndex([datetime.datetime.now(pytz.timezone(tz))], tz=tz)
     elif configuration.az_el_option == "BusTime":
-        times = DatetimeIndex([datetime.datetime.now(pytz.timezone(tz)) - timedelta], tz=tz) # Adjust for time difference from bus (no timezone needed, is included in timedelta)
+        times = DatetimeIndex([datetime.datetime.now(pytz.timezone(tz)) - timedelta], tz=tz) # Adjust for time difference from bus
     else:
         return  # Do not calculate if using BusAzEl
     solpos = site.get_solarposition(times)
