@@ -31,6 +31,7 @@ Debug = False #TODO: deactivate for production
 
 
 #imported from config
+version = _get_setting(settings, "Version", "0.0.0")
 latitude = _get_setting(settings, "Latitude")
 longitude = _get_setting(settings, "Longitude")
 az_el_option = _get_setting(settings, "AzElOption", "Internet")

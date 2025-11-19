@@ -11,13 +11,13 @@
   <AzimuthDPT>14.007</AzimuthDPT>
   <ElevationDPT>14.007</ElevationDPT>
   <AzElTimezone>Europe/Zurich</AzElTimezone>
-  <KnxConnectionType>ROUTING</KnxConnectionType>
+  <KnxConnectionType>TUNNELING</KnxConnectionType>
   <KnxIndividualAddress>15.15.255</KnxIndividualAddress>
-  <KnxGatewayIp>10.10.10.10</KnxGatewayIp>
+  <KnxGatewayIp>10.0.0.50</KnxGatewayIp>
   <KnxGatewayPort>3671</KnxGatewayPort>
   <KnxMulticastGroup>224.0.23.12</KnxMulticastGroup>
   <KnxMulticastPort>3671</KnxMulticastPort>
-  <KnxAutoReconnect>false</KnxAutoReconnect>
+  <KnxAutoReconnect>true</KnxAutoReconnect>
   <KnxAutoReconnectWait>5</KnxAutoReconnectWait>
   <Sectors>
     <Sector>

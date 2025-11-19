@@ -5,12 +5,13 @@ from __future__ import annotations
 import asyncio
 import socket
 import sys
-from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 from xknx import XKNX
 from xknx.io import ConnectionConfig, ConnectionType
 import threading
+import psutil
+import ipaddress as ip
 
 
 from . import configuration  # type: ignore
@@ -45,6 +46,15 @@ def get_local_ip(host, port) -> str:
         return "127.0.0.1"
 
 
+def same_subnet(source, target) -> bool:
+    # find matching interface address and netmask
+    for iface_addrs in psutil.net_if_addrs().values():
+        for a in iface_addrs:
+            if a.family == socket.AF_INET and a.address == source:
+                net = ip.ip_network(f"{a.address}/{a.netmask}", strict=False)
+                return ip.ip_address(target) in net
+
+
 async def connect_knx() -> Any:
     """Initialise an xKNX instance and establish a gateway connection."""
 
@@ -65,7 +75,7 @@ async def connect_knx() -> Any:
             individual_address=configuration.knx_individual_address,
             gateway_ip=configuration.knx_gateway_ip,
             gateway_port=configuration.knx_gateway_port,
-            local_ip=configuration.ip_address_knx,
+            local_ip=configuration.ip_address_knx if same_subnet(configuration.knx_gateway_ip, configuration.ip_address_knx) else None,
             multicast_group=configuration.knx_multicast_group,
             multicast_port=configuration.knx_multicast_port,
             auto_reconnect=configuration.knx_auto_reconnect,
@@ -103,6 +113,10 @@ async def connect_knx() -> Any:
 
 async def _async_main() -> None:
     """Async CLI entry point handling KNX connection lifecycle."""
+    if not configuration.version in {"0.9.3", "0.9.2", "0.9.1", "0.9.0", "0.8.0"}:
+        print(f"Conficuration version: {configuration.version} is not supported by this Staerium Server version - please update your configuration file or staerium server installation.")
+        print("Exiting...")
+        return
     configuration.ip_address_knx = get_local_ip(configuration.knx_gateway_ip, configuration.knx_gateway_port)
     configuration.ip_address_internet = get_local_ip("8.8.8.8", 53)
     print(f"Server IP (KNX communication): {configuration.ip_address_knx}")
