@@ -3,9 +3,9 @@
   <Version>0.8.0</Version>
   <Latitude>47.377672</Latitude>
   <Longitude>8.518703</Longitude>
-  <AzElOption>BusAzEl</AzElOption>
-  <TimeAddress></TimeAddress>
-  <DateAddress></DateAddress>
+  <AzElOption>BusTime</AzElOption>
+  <TimeAddress>1/0/0</TimeAddress>
+  <DateAddress>1/0/1</DateAddress>
   <AzimuthAddress>1/0/2</AzimuthAddress>
   <ElevationAddress>1/0/3</ElevationAddress>
   <AzimuthDPT>14.007</AzimuthDPT>

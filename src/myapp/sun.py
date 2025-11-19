@@ -35,7 +35,8 @@ def calculate_solar_position():
     if configuration.az_el_option == "Internet":
         times = DatetimeIndex([datetime.datetime.now(pytz.timezone(tz))], tz=tz)
     elif configuration.az_el_option == "BusTime":
-        times = DatetimeIndex([datetime.datetime.now(pytz.timezone(tz)) - timedelta], tz=tz) # Adjust for time difference from bus
+        time = (datetime.datetime.now(pytz.timezone(tz)) - timedelta).replace(tzinfo=None) # Remove tzinfo since it is wrong if the syste time is not in the same time season
+        times = DatetimeIndex([time], tz=tz) # Adjust for time difference from bus
     else:
         return  # Do not calculate if using BusAzEl
     solpos = site.get_solarposition(times)

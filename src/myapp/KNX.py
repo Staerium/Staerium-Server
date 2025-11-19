@@ -93,6 +93,7 @@ def telegram_received(telegram):
                 internal_second = (datetime.datetime.now(pytz.timezone(sun.tz))).second
                 sun.timedelta = datetime.datetime(internal_year,internal_month,internal_day,internal_hour,internal_minute,internal_second) - datetime.datetime(year,month,day,current_hour,current_minute,current_second)
                 print(f"Time difference: {sun.timedelta}")
+                print(f"Current time: {datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta}")
 
         if configuration.az_el_option == "BusAzEl":
             if str(telegram.destination_address) == configuration.azimuth_address:
