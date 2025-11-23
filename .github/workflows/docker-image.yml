@@ -19,6 +19,10 @@ jobs:
         with:
           ref: ${{ github.event.release.target_commitish }}
           fetch-depth: 0
+
+      - name: Uninstall existing pip-packages
+        run: |
+          pip freeze | xargs pip uninstall -y
         
       - name: Install dependencies
         run: |
