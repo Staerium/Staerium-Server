@@ -28,16 +28,26 @@ Staerium Server is a Python service that monitors sun position to automate faça
 
 ## Docker / Compose (recommended)
 
-```bash
-docker compose up --build
-```
+Use `compose.yml` to run the published image (`ericstaedler/staerium-server:latest`) or to build locally.
+
+1. **Point Compose to your config** – Edit the `volumes` entry in `compose.yml` to mount your `.sunproj`/`config.xml` (absolute path on the host) to `/app/src/myapp/config.xml:ro`.
+2. **Start the stack** (prebuilt image):
+   ```bash
+   docker compose up -d
+   ```
+3. **Operate**:
+   ```bash
+   docker compose logs -f StaeriumServer
+   docker compose restart StaeriumServer
+   ```
+   Changes to the mounted config take effect after a restart.
 
 
 ## Configuration
 - `src/myapp/config.xml` contains the baked-in defaults used for tests and development.
 - `configuration.sunproj` is an alternate export kept for reference.
 - `src/myapp/config_loader.py` parses and validates KNX addressing, ensuring every group and physical address stays within the KNX specification.
-- Adjust operational settings (gateway IPs, reconnection policy, azimuth/elevation options, sectors, time programs) either by editing the XML or by providing your own file at runtime.
+- Adjust operational settings (gateway IPs, reconnection policy, azimuth/elevation options, sectors, time programs) by providing your own file from the Staerium Configurator (https://github.com/Staerium/Configurator).
 
 
 ## Project Layout
@@ -45,7 +55,8 @@ docker compose up --build
 - `tests/` – Pytest suite.
 - `requirements.txt` – Runtime + developer dependencies.
 - `Dockerfile` / `compose.yml` – Container build and deployment descriptors.
-- `licenses.txt` – Project license guidance and third-party notices.
+- `licenses.txt` – third-party notices.
+- `LICENSE.txt` – Project license.
 
 ## Licensing
-See `licenses.txt` for guidance on selecting a project license and the upstream licenses for bundled dependencies.
+See `LICENSE.txt`
