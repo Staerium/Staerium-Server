@@ -14,6 +14,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+COPY licenses.txt .
+COPY LICENSE.txt .
 RUN python -m pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
