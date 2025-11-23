@@ -2,6 +2,7 @@ from typing import Any
 from collections.abc import Mapping
 import sys
 from pathlib import Path
+import os
 
 
 try:
@@ -27,7 +28,8 @@ def _get_setting(source: Any, key: str, default: Any = None) -> Any:
 ip_address_knx = "127.0.0.1"
 ip_address_internet = "127.0.0.1"
 
-Debug = False #TODO: deactivate for production
+_debug_env = os.getenv("DEBUG", "")
+Debug = _debug_env.lower() in ("1", "true", "yes", "y", "on")
 
 
 #imported from config
