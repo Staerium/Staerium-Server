@@ -1,5 +1,5 @@
 services:
-  app:
+  StaeriumServer:
     image: ericstaedler/staerium-server:latest
     environment:
       - APP_NAME=StaeriumServer
