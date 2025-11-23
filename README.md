@@ -1,12 +1,12 @@
 # Staerium Server
 
-Staerium Server is a Python service that monitors sun position and KNX bus telemetry to automate façade sectors. The application can run directly on a host system or inside the provided Docker container and relies on an XML configuration file that mirrors the Staerium Sun Project export format.
+Staerium Server is a Python service that monitors sun position to automate façade sectors. The application can run directly on a host system or inside the provided Docker container and relies on an XML configuration file (`.sunproj`) that mirrors the Staerium Sun Project export format.
 
 ## Requirements
 - Python 3.10 or newer (the Docker image uses 3.12)
 - pip 23+
 - Access to a KNX/IP interface or router
-- An exported Staerium XML configuration (`config.xml` / `.sunproj`)
+- An exported Staerium XML configuration (`.sunproj`)
 
 ## Quick Start
 1. **Create a virtual environment**
@@ -26,12 +26,12 @@ Staerium Server is a Python service that monitors sun position and KNX bus telem
    ```
    The process prints the detected IP addresses, synchronises time (if enabled) and starts the KNX listeners plus the sector and time-program worker threads.
 
-## Docker / Compose
-Build and run the container without touching the host Python installation:
+## Docker / Compose (recommended)
+
 ```bash
 docker compose up --build
 ```
-The compose definition builds from the local Dockerfile, runs the service as the non-root `appuser`, and can be extended with volume mounts for configuration or logs.
+
 
 ## Configuration
 - `src/myapp/config.xml` contains the baked-in defaults used for tests and development.
