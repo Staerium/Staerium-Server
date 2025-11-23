@@ -39,12 +39,6 @@ docker compose up --build
 - `src/myapp/config_loader.py` parses and validates KNX addressing, ensuring every group and physical address stays within the KNX specification.
 - Adjust operational settings (gateway IPs, reconnection policy, azimuth/elevation options, sectors, time programs) either by editing the XML or by providing your own file at runtime.
 
-## Testing
-Run the unit test suite (after installing `pytest` via `requirements.txt`):
-```bash
-PYTHONPATH=src python -m pytest
-```
-The tests cover configuration loading and the CLI entry point. Add targeted tests for KNX telegram handling, sector logic, and the time-program scheduler as you extend the project.
 
 ## Project Layout
 - `src/myapp/` – Application packages (`main`, configuration helpers, KNX handlers, sector/time program runners, solar calculations).
