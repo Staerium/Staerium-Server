@@ -10,12 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-      contents: read
+      contents: write
       attestations: write
       id-token: write
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+          fetch-depth: 0
         
       - name: Install dependencies
         run: |
@@ -30,6 +33,20 @@ jobs:
             --with-license-file --no-license-path \
             --ignore-packages pip setuptools pip-licenses \
             --output-file=licenses.txt
+
+      - name: Commit updated licenses.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add licenses.txt
+          if git diff --cached --quiet; then
+            echo "No changes to licenses.txt; skipping commit."
+            exit 0
+          fi
+          git commit -m "chore: update licenses.txt"
+          git push origin HEAD:${{ github.event.release.target_commitish }}
             
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
@@ -49,8 +66,12 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: |
-            my-docker-hub-namespace/my-docker-hub-repository
+            ericstaedler/staerium-server
             ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=tag
+            type=sha
+            type=raw,value=latest
 
       - name: Build and push Docker images
         id: push
