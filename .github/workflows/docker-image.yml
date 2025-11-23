@@ -19,19 +19,18 @@ jobs:
         with:
           ref: ${{ github.event.release.target_commitish }}
           fetch-depth: 0
-
-      - name: Uninstall existing pip-packages
-        run: |
-          pip freeze | xargs pip uninstall -y
         
-      - name: Install dependencies
+      - name: Set up venv and install dependencies
         run: |
+          python -m venv .venv
+          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pip-licenses
   
       - name: Generate licenses.txt
         run: |
+          source .venv/bin/activate
           pip-licenses \
             --format=plain-vertical \
             --with-license-file --no-license-path \
