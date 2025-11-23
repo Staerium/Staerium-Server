@@ -3,6 +3,7 @@ services:
     image: ericstaedler/staerium-server:latest
     environment:
       - APP_NAME=StaeriumServer
+      - DEBUG=False
     volumes:
       - ./configuration.sunproj:/app/src/myapp/config.xml:ro
     restart: unless-stopped
