@@ -175,10 +175,14 @@ def start(loop):
                 # convert percent (0-100) to 0-255 for the NumericValue device
                 angle_bytes = int(round(angle_percent * 255.0 / 100.0))
 
+                # Convert minimum change from percent to bytes for comparison
+                louvre_minimum_change_bytes = sector.get("LouvreMinimumChange", 1) * 255.0 / 100.0
+                
+                # Check if change is enough to send update
                 should_send_angle = False
                 with sectors_lock:
                     last_angle_bytes = sectors[guid].get("angle_bytes_sent", 180)
-                    if abs(last_angle_bytes - angle_bytes) >= sector.get("LouvreMinimumChange", 1):
+                    if abs(last_angle_bytes - angle_bytes) >= louvre_minimum_change_bytes:
                         sectors[guid]["angle_bytes_sent"] = angle_bytes
                         should_send_angle = True
 
