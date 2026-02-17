@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 import time
 
 import pytz
@@ -7,15 +8,17 @@ from xknx.devices import NumericValue, Switch
 
 from . import SectorRunner, configuration, sun
 
+logger = logging.getLogger(__name__)
+
 
 def start(loop):
     timezone = pytz.timezone(sun.tz)
     scheduled_commands = _build_schedule(timezone)
     if not scheduled_commands:
-        print("No valid time program commands configured.")
+        logger.info("No valid time program commands configured.")
         return
 
-    print(f"{len(scheduled_commands)} time program command(s) scheduled.")
+    logger.info("%s time program command(s) scheduled.", len(scheduled_commands))
     while True:
         now = _current_time(timezone)
         due_commands = [entry for entry in scheduled_commands if entry["next_run"] <= now]
@@ -63,7 +66,12 @@ def _build_schedule(timezone):
                 continue
             schedule.append(entry)
             valid += 1
-        print(f"Time Program: {program_name} - {valid} scheduled command{'s' if valid != 1 else ''}.")
+        logger.info(
+            "Time Program: %s - %s scheduled command%s.",
+            program_name,
+            valid,
+            "s" if valid != 1 else "",
+        )
 
     return schedule
 
@@ -71,29 +79,39 @@ def _build_schedule(timezone):
 def _prepare_command(program_name, command, index, timezone):
     command_type = str(command.get("Type", "1bit")).strip().lower()
     if command_type not in {"1bit", "1byte"}:
-        print(f"Skipping command {program_name}#{index}: unsupported type '{command_type}'.")
+        logger.warning(
+            "Skipping command %s#%s: unsupported type '%s'.",
+            program_name,
+            index,
+            command_type,
+        )
         return None
 
     try:
         hour, minute, second = _parse_time_string(command.get("Time", "00:00"))
     except ValueError as exc:
-        print(f"Skipping command {program_name}#{index}: invalid time value ({exc}).")
+        logger.warning(
+            "Skipping command %s#%s: invalid time value (%s).",
+            program_name,
+            index,
+            exc,
+        )
         return None
 
     weekdays = _normalize_weekdays(command.get("Weekdays"))
     if weekdays == 0:
-        print(f"Skipping command {program_name}#{index}: no weekdays selected.")
+        logger.warning("Skipping command %s#%s: no weekdays selected.", program_name, index)
         return None
 
     group_address = (command.get("GroupAddress") or "").strip()
     if not group_address:
-        print(f"Skipping command {program_name}#{index}: missing group address.")
+        logger.warning("Skipping command %s#%s: missing group address.", program_name, index)
         return None
 
     try:
         value = _coerce_command_value(command_type, command.get("Value"))
     except ValueError as exc:
-        print(f"Skipping command {program_name}#{index}: {exc}.")
+        logger.warning("Skipping command %s#%s: %s.", program_name, index, exc)
         return None
 
     device_name = f"time_program_{program_name}_{index}"
@@ -168,7 +186,7 @@ def _normalize_weekdays(raw_value):
 def _build_device(command_type, group_address, device_name):
     xknx_instance = SectorRunner.xknx
     if xknx_instance is None:
-        print("KNX connection not ready; command execution will be delayed.")
+        logger.warning("KNX connection not ready; command execution will be delayed.")
         return None
 
     if command_type == "1bit":
@@ -224,8 +242,7 @@ def _ensure_device(entry):
 def _dispatch_command(entry, loop, timestamp):
     device = _ensure_device(entry)
     if device is None:
-        if configuration.Debug:
-            print(f"Skipping time program '{entry['program']}' - KNX device unavailable.")
+        logger.debug("Skipping time program '%s' - KNX device unavailable.", entry["program"])
         return
 
     try:
@@ -237,10 +254,18 @@ def _dispatch_command(entry, loop, timestamp):
         elif entry["type"] == "1byte":
             future = asyncio.run_coroutine_threadsafe(device.set(entry["value"]), loop)
         future.result()
-        print(f"Time program '{entry['program']}' wrote {entry['value']} "f"to {entry['group_address']} at {timestamp.isoformat()}")
+        logger.info(
+            "Time program '%s' wrote %s to %s at %s",
+            entry["program"],
+            entry["value"],
+            entry["group_address"],
+            timestamp.isoformat(),
+        )
         
     except Exception as exc:  # pragma: no cover - transport errors are environment dependent
-        print(
-            f"Failed to execute time program '{entry['program']}' "
-            f"for {entry['group_address']}: {exc}"
+        logger.error(
+            "Failed to execute time program '%s' for %s: %s",
+            entry["program"],
+            entry["group_address"],
+            exc,
         )

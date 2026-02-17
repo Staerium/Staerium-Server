@@ -1,4 +1,5 @@
 import datetime
+import logging
 import math
 import threading
 import sys
@@ -14,6 +15,8 @@ if __package__ in {None, ""}:
     from myapp import SectorRunner, configuration, sun  # type: ignore
 else:
     from . import SectorRunner, configuration, sun  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 def decode_dpt9(byte_pair):
     hi, lo = byte_pair            # hi = erstes Byte (MEEEEMMM), lo = zweites Byte (MMMMMMMM)
@@ -44,7 +47,7 @@ def decode_dpt14(byte_quad):
 def telegram_received(telegram):
     try:
         """Callback for received KNX telegrams."""
-        if configuration.Debug: print(f"Received KNX telegram: {telegram}")
+        logger.debug("Received KNX telegram: %s", telegram)
 
         if configuration.az_el_option == "BusTime":
             if str(telegram.destination_address) == configuration.time_address:
@@ -53,9 +56,9 @@ def telegram_received(telegram):
                     minute = telegram.payload.value.value[1] & 0b00111111
                     second = telegram.payload.value.value[2] & 0b00111111
                 except Exception as e:
-                    print(f"Error decoding time from bus: {e}")
+                    logger.warning("Error decoding time from bus: %s", e)
                     return
-                print(f"Time from bus: {hour}:{minute}:{second}")
+                logger.info("Time from bus: %02d:%02d:%02d", hour, minute, second)
                 current_year = (datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta).year
                 current_month = (datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta).month
                 current_day = (datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta).day
@@ -66,7 +69,7 @@ def telegram_received(telegram):
                 internal_minute = (datetime.datetime.now(pytz.timezone(sun.tz))).minute
                 internal_second = (datetime.datetime.now(pytz.timezone(sun.tz))).second
                 sun.timedelta = datetime.datetime(internal_year,internal_month,internal_day,internal_hour,internal_minute,internal_second) - datetime.datetime(current_year,current_month,current_day,hour,minute,second)
-                print(f"Time difference: {sun.timedelta}")
+                logger.info("Time difference: %s", sun.timedelta)
                 sun.calculate_solar_position()
 
             if str(telegram.destination_address) == configuration.date_address:
@@ -75,13 +78,13 @@ def telegram_received(telegram):
                     month = telegram.payload.value.value[1] & 0b00001111
                     raw_year = telegram.payload.value.value[2] & 0b01111111
                 except Exception as e:
-                    print(f"Error decoding date from bus: {e}")
+                    logger.warning("Error decoding date from bus: %s", e)
                     return
                 if raw_year >= 90:
                     year = 1900 + raw_year
                 else:
                     year = 2000 + raw_year
-                print(f"Date from bus: {year}-{month}-{day}")
+                logger.info("Date from bus: %04d-%02d-%02d", year, month, day)
                 current_hour = (datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta).hour
                 current_minute = (datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta).minute
                 current_second = (datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta).second
@@ -92,8 +95,8 @@ def telegram_received(telegram):
                 internal_minute = (datetime.datetime.now(pytz.timezone(sun.tz))).minute
                 internal_second = (datetime.datetime.now(pytz.timezone(sun.tz))).second
                 sun.timedelta = datetime.datetime(internal_year,internal_month,internal_day,internal_hour,internal_minute,internal_second) - datetime.datetime(year,month,day,current_hour,current_minute,current_second)
-                print(f"Time difference: {sun.timedelta}")
-                print(f"Current time: {datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta}")
+                logger.info("Time difference: %s", sun.timedelta)
+                logger.info("Current time: %s", datetime.datetime.now(pytz.timezone(sun.tz)) - sun.timedelta)
 
         if configuration.az_el_option == "BusAzEl":
             if str(telegram.destination_address) == configuration.azimuth_address:
@@ -105,9 +108,9 @@ def telegram_received(telegram):
                     elif configuration.azimuth_dpt == 14.007:
                         azimuth = decode_dpt14(telegram.payload.value.value)
                 except Exception as e:
-                    print(f"Error decoding azimuth from bus: {e}")
+                    logger.warning("Error decoding azimuth from bus: %s", e)
                     return
-                print(f"Azimuth from bus: {azimuth}°")
+                logger.info("Azimuth from bus: %s°", azimuth)
                 sun.current_azimuth = azimuth
 
             if str(telegram.destination_address) == configuration.elevation_address:
@@ -119,9 +122,9 @@ def telegram_received(telegram):
                     elif configuration.elevation_dpt == 14.007:
                         elevation = decode_dpt14(telegram.payload.value.value)
                 except Exception as e:
-                    print(f"Error decoding elevation from bus: {e}")
+                    logger.warning("Error decoding elevation from bus: %s", e)
                     return
-                print(f"Elevation from bus: {elevation}°")
+                logger.info("Elevation from bus: %s°", elevation)
                 sun.current_elevation = elevation
 
         for sector in configuration.sectors:
@@ -129,9 +132,9 @@ def telegram_received(telegram):
                 try:
                     val = decode_dpt9(telegram.payload.value.value)
                 except Exception as e:
-                    print(f"Error decoding telegram payload: {e}")
+                    logger.warning("Error decoding telegram payload: %s", e)
                     return
-                print(f"Brightness from bus for {sector['Name']}: {val} Lux")
+                logger.info("Brightness from bus for %s: %s Lux", sector["Name"], val)
                 # brightness / irradiance_state values: 
                 # 1 = Below lower threshold
                 # 2 = Below lower threshold, about to turn to 1 (on)
@@ -161,9 +164,9 @@ def telegram_received(telegram):
                 try:
                     val = decode_dpt9(telegram.payload.value.value)
                 except Exception as e:
-                    print(f"Error decoding telegram payload: {e}")
+                    logger.warning("Error decoding telegram payload: %s", e)
                     return
-                print(f"Irradiance from bus for {sector['Name']}: {val} Lux")
+                logger.info("Irradiance from bus for %s: %s Lux", sector["Name"], val)
                 # brightness / irradiance_state values: 
                 # 1 = Below lower threshold
                 # 2 = Below lower threshold, about to turn to 1 (on)
@@ -193,13 +196,17 @@ def telegram_received(telegram):
                 try:
                     val = telegram.payload.value.value
                 except Exception as e:
-                    print(f"Error decoding telegram payload: {e}")
+                    logger.warning("Error decoding telegram payload: %s", e)
                     return
                 if sector["OnAutoBehavior"] == "Auto":
                     mode = val
                 else:
                     mode = not val
-                if configuration.Debug: print(f"Sector {sector['Name']} set to {'Auto' if mode else 'On'} mode from bus")
+                logger.info(
+                    "Sector %s set to %s mode from bus",
+                    sector["Name"],
+                    "Auto" if mode else "On",
+                )
                 with SectorRunner.sectors_lock:
                     SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "On"
 
@@ -207,14 +214,18 @@ def telegram_received(telegram):
                 try:
                     val = telegram.payload.value.value == 1
                 except Exception as e:
-                    print(f"Error decoding telegram payload: {e}")
+                    logger.warning("Error decoding telegram payload: %s", e)
                     return
                 if sector["OffAutoBehavior"] == "Auto":
                     mode = val
                 else:
                     mode = not val
-                if configuration.Debug: print(f"Sector {sector['Name']} set to {'Auto' if mode else 'Off'} mode from bus")
+                logger.info(
+                    "Sector %s set to %s mode from bus",
+                    sector["Name"],
+                    "Auto" if mode else "Off",
+                )
                 with SectorRunner.sectors_lock:
                     SectorRunner.sectors[sector["GUID"]]["Mode"] = "Auto" if mode else "Off"
     except Exception as e:
-        print(f"Error processing telegram: {e}")
+        logger.exception("Error processing telegram: %s", e)

@@ -23,7 +23,9 @@ COPY src ./src
 
 ENV PYTHONPATH=/app/src
 
-RUN useradd --create-home --shell /bin/bash appuser
+RUN useradd --create-home --shell /bin/bash appuser \
+    && mkdir -p /app/logs \
+    && chown -R appuser:appuser /app
 USER appuser
 
 CMD ["python", "-m", "myapp.main"]

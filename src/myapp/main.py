@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import socket
 import sys
 from pathlib import Path
@@ -18,7 +19,10 @@ from . import configuration  # type: ignore
 from . import SectorRunner
 from . import KNX
 from . import check_time
+from . import logging_config
 from . import TimeProgramRunner
+
+logger = logging.getLogger(__name__)
 
 
 try:
@@ -69,7 +73,11 @@ async def connect_knx() -> Any:
         ) from exc
 
     if connection_type in {ConnectionType.TUNNELING, ConnectionType.TUNNELING_TCP}:
-        print(f"Connecting to KNX gateway at {configuration.knx_gateway_ip}:{configuration.knx_gateway_port} ...")
+        logger.info(
+            "Connecting to KNX gateway at %s:%s ...",
+            configuration.knx_gateway_ip,
+            configuration.knx_gateway_port,
+        )
         connection_config = ConnectionConfig(
             connection_type=connection_type,
             individual_address=configuration.knx_individual_address,
@@ -82,7 +90,11 @@ async def connect_knx() -> Any:
             auto_reconnect_wait=configuration.knx_auto_reconnect_wait,
         )
     else:
-        print(f"Connecting to KNX gateway at {configuration.knx_multicast_group}:{configuration.knx_multicast_port} ...")
+        logger.info(
+            "Connecting to KNX gateway at %s:%s ...",
+            configuration.knx_multicast_group,
+            configuration.knx_multicast_port,
+        )
         connection_config = ConnectionConfig(
             connection_type=connection_type,
             individual_address=configuration.knx_individual_address,
@@ -98,7 +110,11 @@ async def connect_knx() -> Any:
         await SectorRunner.xknx.start()
         return SectorRunner.xknx
     except Exception as e:
-        print(f"Error connecting to KNX: {e}, retrying... in {configuration.knx_auto_reconnect_wait} seconds")
+        logger.error(
+            "Error connecting to KNX: %s, retrying in %s seconds",
+            e,
+            configuration.knx_auto_reconnect_wait,
+        )
         started = False
         while not started and configuration.knx_auto_reconnect:
             await asyncio.sleep(configuration.knx_auto_reconnect_wait)
@@ -107,33 +123,42 @@ async def connect_knx() -> Any:
                 started = True
                 return SectorRunner.xknx
             except Exception as e:
-                print(f"Reconnection failed: {e}, retrying... in {configuration.knx_auto_reconnect_wait} seconds")
+                logger.error(
+                    "Reconnection failed: %s, retrying in %s seconds",
+                    e,
+                    configuration.knx_auto_reconnect_wait,
+                )
         return None
 
 
 async def _async_main() -> None:
     """Async CLI entry point handling KNX connection lifecycle."""
+    logging_config.setup_logging(debug=configuration.Debug)
     if not configuration.version in {"1.0.0", "0.9.6", "0.9.5", "0.9.4","0.9.3", "0.9.2", "0.9.1", "0.9.0"}:
-        print(f"Conficuration version: {configuration.version} is not supported by this Staerium Server version - please update your configuration file or staerium server installation.")
-        print("Exiting...")
+        logger.error(
+            "Conficuration version %s is not supported by this Staerium Server version.",
+            configuration.version,
+        )
+        logger.error("Please update your configuration file or Staerium Server installation.")
+        logger.info("Exiting...")
         return
     configuration.ip_address_knx = get_local_ip(configuration.knx_gateway_ip, configuration.knx_gateway_port)
     configuration.ip_address_internet = get_local_ip("8.8.8.8", 53)
-    print(f"Server IP (KNX communication): {configuration.ip_address_knx}")
-    print(f"Server IP (Internet communication): {configuration.ip_address_internet}")
+    logger.info("Server IP (KNX communication): %s", configuration.ip_address_knx)
+    logger.info("Server IP (Internet communication): %s", configuration.ip_address_internet)
     # TODO: Print IP for API
 
     knx: XKNX | None = None
     try:
         knx = await connect_knx()
         if knx is None:
-            print(
+            logger.error(
                 "Unable to establish a KNX connection. "
                 "Please verify the gateway settings and try again."
             )
             return
 
-        print("Connected to KNX gateway.")
+        logger.info("Connected to KNX gateway.")
 
         # Check if Time is correct (Check with NTP)
         if configuration.az_el_option == "Internet":
@@ -145,7 +170,7 @@ async def _async_main() -> None:
         SectorRunnerThread.start()
         TimeProgramRunnerThread = threading.Thread(name='TimeProgramRunner', args=(loop,), target=TimeProgramRunner.start, daemon=True)
         TimeProgramRunnerThread.start()
-        print("Welcome to Staerium Server!")
+        logger.info("Welcome to Staerium Server!")
         try:
             await asyncio.Future()
         except asyncio.CancelledError:
@@ -153,7 +178,7 @@ async def _async_main() -> None:
     finally:
         if knx is not None:
             await knx.stop()
-            print("KNX connection closed.")
+            logger.info("KNX connection closed.")
 
 
 def main() -> None:

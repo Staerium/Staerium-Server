@@ -1,6 +1,9 @@
 import ntplib
 import datetime
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 async def check_system_time(threshold_seconds=5):
     client = ntplib.NTPClient()
@@ -10,7 +13,7 @@ async def check_system_time(threshold_seconds=5):
             response = client.request('pool.ntp.org')  # Öffentlicher NTP-Server
             ntp_time = datetime.datetime.fromtimestamp(response.tx_time, datetime.timezone.utc)
         except Exception as e:
-            print(f"Error fetching NTP time: {e}; retrying in 5 seconds...")
+            logger.warning("Error fetching NTP time: %s; retrying in 5 seconds...", e)
             await asyncio.sleep(5)
     local_time = datetime.datetime.now(datetime.timezone.utc)
     
@@ -19,5 +22,7 @@ async def check_system_time(threshold_seconds=5):
     if delta <= threshold_seconds:
         return True
     else:
-        print("System time deviates too much! Please ensure that the system time is synchronized with an NTP server.")
+        logger.error(
+            "System time deviates too much. Ensure system time is synchronized with an NTP server."
+        )
         return False

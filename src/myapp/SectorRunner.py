@@ -1,10 +1,13 @@
 from xknx.devices import NumericValue, Switch
 import asyncio
+import logging
 import math
 import time
 
 from . import configuration, sun
 import threading
+
+logger = logging.getLogger(__name__)
 
 xknx = None
 
@@ -26,21 +29,24 @@ def calculate_lps():
     global loop_count
     lps = loop_count / 10
     if lps < 1:
-        print(f"Server is running really slow! Please check your configuration and hardware. (LPS = {lps})")
+        logger.warning(
+            "Server is running really slow. Please check configuration and hardware. (LPS=%s)",
+            lps,
+        )
     else:
-        if configuration.Debug: print(f"LPS: {lps}")
+        logger.debug("LPS: %s", lps)
     loop_count = 0
 
 
 def set_brightness_state(guid, state):
     with sectors_lock:
         sectors[guid]["brightness_state"] = state
-    if configuration.Debug: print(f"Sector {guid} brightness state set to {state}")
+    logger.debug("Sector %s brightness state set to %s", guid, state)
 
 def set_irradiance_state(guid, state):
     with sectors_lock:
         sectors[guid]["irradiance_state"] = state
-    if configuration.Debug: print(f"Sector {guid} irradiance state set to {state}")
+    logger.debug("Sector %s irradiance state set to %s", guid, state)
 
 
 
@@ -70,7 +76,10 @@ def start(loop):
         if sector["SunBoolAddress"] != "":
             sun_bool_sender = Switch(xknx=xknx, name=f"{guid}_sun_bool", group_address=sector["SunBoolAddress"], respond_to_read=True)
         else:
-            print(f"Warning: Sector {sector['GUID']} has no SunBoolAddress defined. Sun state will not be sent to KNX for this sector.")
+            logger.warning(
+                "Sector %s has no SunBoolAddress defined. Sun state will not be sent to KNX.",
+                sector["Name"],
+            )
             sun_bool_sender = Switch(xknx=xknx, name=f"{guid}_sun_bool", group_address=None, respond_to_read=True)
         xknx.devices.async_add(sun_bool_sender)
         with sectors_lock:
@@ -131,7 +140,11 @@ def start(loop):
                     state_changed = True
 
             if state_changed:
-                print(f"Sector {sector['GUID']} sun state changed to {'On' if sun_state else 'Off'}")
+                logger.info(
+                    "Sector %s sun state changed to %s",
+                    sector["GUID"],
+                    "On" if sun_state else "Off",
+                )
                 if sun_state:
                     if sun_bool_sender:
                         future = asyncio.run_coroutine_threadsafe(sun_bool_sender.set_on(), loop)
@@ -194,7 +207,13 @@ def start(loop):
                 if should_send_angle:
                     future = asyncio.run_coroutine_threadsafe(louvre_sender.set(angle_bytes), loop)
                     future.result()
-                    print(f"Sector {sector['GUID']} louvre angle deg={angle_deg:.2f} => {angle_percent:.1f}% => bytes={angle_bytes}")
+                    logger.info(
+                        "Sector %s louvre angle deg=%.2f => %.1f%% => bytes=%s",
+                        sector["Name"],
+                        angle_deg,
+                        angle_percent,
+                        angle_bytes,
+                    )
         time.sleep(0.001)
 
 

@@ -29,7 +29,7 @@ ip_address_knx = "127.0.0.1"
 ip_address_internet = "127.0.0.1"
 
 _debug_env = os.getenv("DEBUG", "")
-Debug = _debug_env.lower() in ("1", "true", "yes", "y", "on")
+Debug = _debug_env.lower() in ("1", "true", "yes", "y", "on", "ein", "wahr", "ja", "j", "an", "aktiv", "enable", "enabled")
 
 
 #imported from config
