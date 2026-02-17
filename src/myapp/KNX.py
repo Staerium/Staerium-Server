@@ -132,6 +132,11 @@ def telegram_received(telegram):
                     print(f"Error decoding telegram payload: {e}")
                     return
                 print(f"Brightness from bus for {sector['Name']}: {val} Lux")
+                # brightness / irradiance_state values: 
+                # 1 = Below lower threshold
+                # 2 = Below lower threshold, about to turn to 1 (on)
+                # 3 = Above upper threshold, about to turn to 4 (off)
+                # 4 = Above upper threshold
                 with SectorRunner.sectors_lock:
                     sector_state = SectorRunner.sectors[sector["GUID"]]
                     sector_state["Brightness"] = val
@@ -159,6 +164,11 @@ def telegram_received(telegram):
                     print(f"Error decoding telegram payload: {e}")
                     return
                 print(f"Irradiance from bus for {sector['Name']}: {val} Lux")
+                # brightness / irradiance_state values: 
+                # 1 = Below lower threshold
+                # 2 = Below lower threshold, about to turn to 1 (on)
+                # 3 = Above upper threshold, about to turn to 4 (off)
+                # 4 = Above upper threshold
                 with SectorRunner.sectors_lock:
                     sector_state = SectorRunner.sectors[sector["GUID"]]
                     sector_state["Irradiance"] = val

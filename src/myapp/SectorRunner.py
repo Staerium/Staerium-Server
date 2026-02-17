@@ -95,8 +95,13 @@ def start(loop):
             relative_azimuth = (sun.current_azimuth - sector["Orientation"])
             if relative_azimuth > 180:
                 relative_azimuth = relative_azimuth - 360
-            brightness_active = brightness_state == 4
-            irradiance_active = irradiance_state == 4
+            # brightness / irradiance_state values: 
+            # 1 = Below lower threshold
+            # 2 = Below lower threshold, about to turn to 1 (on)
+            # 3 = Above upper threshold, about to turn to 4 (off)
+            # 4 = Above upper threshold
+            brightness_active = (brightness_state == 4 or brightness_state == 2)
+            irradiance_active = (irradiance_state == 4 or irradiance_state == 2)
             if sector["UseBrightness"]:
                 if sector["UseIrradiance"]:
                     if sector["BrightnessIrradianceLink"] == "And":
