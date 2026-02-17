@@ -54,6 +54,7 @@ def start(loop):
     global sun
     global loop_count
     calculate_lps()
+    target_loop_period = 1.0 / 20.0  # Cap loop frequency at 20 iterations per second.
     for sector in configuration.sectors:
         guid = sector["GUID"]
 
@@ -87,6 +88,7 @@ def start(loop):
 
 
     while True:
+        loop_started = time.monotonic()
         loop_count = loop_count + 1
         if configuration.az_el_option != "BusAzEl":
             sun.calculate_solar_position()
@@ -214,7 +216,10 @@ def start(loop):
                         angle_percent,
                         angle_bytes,
                     )
-        time.sleep(0.001)
+        elapsed = time.monotonic() - loop_started
+        remaining = target_loop_period - elapsed
+        if remaining > 0:
+            time.sleep(remaining)
 
 
 def horizon_limit_check(sector, relative_azimuth, current_elevation):
