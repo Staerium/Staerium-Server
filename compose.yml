@@ -6,4 +6,6 @@ services:
       - DEBUG=False
     volumes:
       - ./configuration.sunproj:/app/src/myapp/config.xml:ro
+      # Optionally mount a logs directory if you want to persist logs outside the container. Make sure to create the logs directory on the host before starting the container.
+      # - ./logs:/app/logs
     restart: unless-stopped
