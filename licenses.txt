@@ -29,7 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 certifi
-2025.11.12
+2026.1.4
 Mozilla Public License 2.0 (MPL 2.0)
 This package contains a modified version of ca-bundle.crt:
 
@@ -108,7 +108,7 @@ SOFTWARE.
 
 
 cryptography
-46.0.3
+46.0.5
 Apache-2.0 OR BSD-3-Clause
 This software is made available under the terms of *either* of the licenses
 found in LICENSE.APACHE or LICENSE.BSD. Contributions to cryptography are made
@@ -321,7 +321,7 @@ MIT License
 ###############################################################################
 
 numpy
-2.4.0
+2.4.2
 BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
 Copyright (c) 2005-2025, NumPy Developers.
 All rights reserved.
@@ -1261,8 +1261,8 @@ License: LGPL-2.1-or-later
 
 
 packaging
-25.0
-Apache Software License; BSD License
+26.0
+Apache-2.0 OR BSD-2-Clause
 This software is made available under the terms of *either* of the licenses
 found in LICENSE.APACHE or LICENSE.BSD. Contributions to this software is made
 under the terms of *both* these licenses.
@@ -2549,7 +2549,7 @@ SOFTWARE.
 
 
 psutil
-7.2.0
+7.2.2
 BSD-3-Clause
 BSD 3-Clause License
 
@@ -2620,8 +2620,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 pycparser
-2.23
-BSD License
+3.0
+BSD-3-Clause
 pycparser -- A C parser in Python
 
 Copyright (c) 2008-2022, Eli Bendersky
@@ -2940,7 +2940,7 @@ Apache Software License
 
 
 scipy
-1.16.3
+1.17.0
 BSD License
 Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
 All rights reserved.
@@ -3922,7 +3922,7 @@ limitations under the License.
 
 
 urllib3
-2.6.2
+2.6.3
 MIT
 MIT License
 
@@ -3948,8 +3948,8 @@ SOFTWARE.
 
 
 xknx
-3.13.0
-MIT License
+3.15.0
+MIT
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
