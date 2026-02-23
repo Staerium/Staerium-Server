@@ -54,6 +54,16 @@ def _get_highest_brightness_threshold_low(sector):
         return sector.get("BrightnessLowerThreshold")
     return max(point.get("Brightness", float(0)) for point in sector["BrightnessDelayLow"]["Point"])
 
+def _get_lowest_irradiance_threshold_high(sector):
+    if not sector.get("IrradianceDelayHigh"):
+        return sector.get("IrradianceUpperThreshold")
+    return min(point.get("Irradiance", float('inf')) for point in sector["IrradianceDelayHigh"]["Point"])
+
+def _get_highest_irradiance_threshold_low(sector):
+    if not sector.get("IrradianceDelayLow"):
+        return sector.get("IrradianceLowerThreshold")
+    return max(point.get("Irradiance", float(0)) for point in sector["IrradianceDelayLow"]["Point"])
+
 def _get_timer_interval(sector_state, key, default):
     try: 
         timer = sector_state.get(key)
@@ -116,6 +126,62 @@ def _get_dynamic_brightness_delay_low(sector, val):
         return sorted_points[0].get("Seconds", sector.get("BrightnessLowerDelay"))
     else:
         return sorted_points[-1].get("Seconds", sector.get("BrightnessLowerDelay"))
+
+def _get_dynamic_irradiance_delay_high(sector, val):
+    if not sector.get("IrradianceDelayHigh"):
+        return sector.get("IrradianceUpperDelay")
+    points = sector["IrradianceDelayHigh"]["Point"]
+    if len(points) < 2:
+        return points[0].get("Seconds", sector.get("IrradianceUpperDelay"))
+    
+    # Find the two points to interpolate between
+    sorted_points = sorted(points, key=lambda p: p.get("Irradiance", float('inf')))
+    
+    for i in range(len(sorted_points) - 1):
+        x1 = sorted_points[i].get("Irradiance", float('inf'))
+        x2 = sorted_points[i + 1].get("Irradiance", float('inf'))
+        y1 = sorted_points[i].get("Seconds", sector.get("IrradianceUpperDelay"))
+        y2 = sorted_points[i + 1].get("Seconds", sector.get("IrradianceUpperDelay"))
+        
+        if x1 <= val <= x2:
+            # Linear interpolation
+            if x2 == x1:
+                return y1
+            return y1 + (val - x1) * (y2 - y1) / (x2 - x1)
+    
+    # If val is outside range, return the closest point's delay
+    if val < sorted_points[0].get("Irradiance", float('inf')):
+        return sorted_points[0].get("Seconds", sector.get("IrradianceUpperDelay"))
+    else:
+        return sorted_points[-1].get("Seconds", sector.get("IrradianceUpperDelay"))
+    
+def _get_dynamic_irradiance_delay_low(sector, val):
+    if not sector.get("IrradianceDelayLow"):
+        return sector.get("IrradianceLowerDelay")
+    points = sector["IrradianceDelayLow"]["Point"]
+    if len(points) < 2:
+        return points[0].get("Seconds", sector.get("IrradianceLowerDelay"))
+    
+    # Find the two points to interpolate between
+    sorted_points = sorted(points, key=lambda p: p.get("Irradiance", float('inf')))
+    
+    for i in range(len(sorted_points) - 1):
+        x1 = sorted_points[i].get("Irradiance", float('inf'))
+        x2 = sorted_points[i + 1].get("Irradiance", float('inf'))
+        y1 = sorted_points[i].get("Seconds", sector.get("IrradianceLowerDelay"))
+        y2 = sorted_points[i + 1].get("Seconds", sector.get("IrradianceLowerDelay"))
+        
+        if x1 <= val <= x2:
+            # Linear interpolation
+            if x2 == x1:
+                return y1
+            return y1 + (val - x1) * (y2 - y1) / (x2 - x1)
+    
+    # If val is outside range, return the closest point's delay
+    if val < sorted_points[0].get("Irradiance", float('inf')):
+        return sorted_points[0].get("Seconds", sector.get("IrradianceLowerDelay"))
+    else:
+        return sorted_points[-1].get("Seconds", sector.get("IrradianceLowerDelay"))
 
 
 def telegram_received(telegram):
@@ -262,8 +328,6 @@ def telegram_received(telegram):
                                 sector_state["brightness_timer_off"].start()
                                 sector_state["brightness_timer_off_start"] = datetime.datetime.now()
 
-
-
                     else:
                         if val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 1:
                             sector_state["brightness_state"] = 3
@@ -298,22 +362,67 @@ def telegram_received(telegram):
                 with SectorRunner.sectors_lock:
                     sector_state = SectorRunner.sectors[sector["GUID"]]
                     sector_state["Irradiance"] = val
-                    if val > sector["IrradianceUpperThreshold"] and sector_state.get("irradiance_state", 1) == 1:
-                        sector_state["irradiance_state"] = 3
-                        sector_state["irradiance_timer_on"] = threading.Timer(sector["IrradianceUpperDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"], 4))
-                        sector_state["irradiance_timer_on"].daemon = True
-                        sector_state["irradiance_timer_on"].start()
-                    elif val > sector["IrradianceUpperThreshold"] and sector_state.get("irradiance_state", 1) == 2:
-                        sector_state["irradiance_state"] = 4
-                        sector_state["irradiance_timer_off"].cancel()
-                    elif val < sector["IrradianceLowerThreshold"] and sector_state.get("irradiance_state", 1) == 3:
-                        sector_state["irradiance_state"] = 1
-                        sector_state["irradiance_timer_on"].cancel()
-                    elif val < sector["IrradianceLowerThreshold"] and sector_state.get("irradiance_state", 1) == 4:
-                        sector_state["irradiance_state"] = 2
-                        sector_state["irradiance_timer_off"] = threading.Timer(sector["IrradianceLowerDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"], 1))
-                        sector_state["irradiance_timer_off"].daemon = True
-                        sector_state["irradiance_timer_off"].start()
+                    if sector["IrradianceDynamicDelay"]:
+                        if val > _get_lowest_irradiance_threshold_high(sector):
+                            if sector_state.get("irradiance_state", 1) == 1:
+                                sector_state["irradiance_state"] = 3
+                                sector_state["irradiance_timer_on"] = threading.Timer(_get_dynamic_irradiance_delay_high(sector, val), SectorRunner.set_irradiance_state, args=(sector["GUID"], 4))
+                                sector_state["irradiance_timer_on"].daemon = True
+                                sector_state["irradiance_timer_on"].start()
+                                sector_state["irradiance_timer_on_start"] = datetime.datetime.now()
+                            elif sector_state.get("irradiance_state", 1) == 2:
+                                sector_state["irradiance_state"] = 4
+                                sector_state["irradiance_timer_off"].cancel()
+                            elif sector_state.get("irradiance_state", 1) == 3:
+                                remaining = _get_timer_interval(sector_state, "irradiance_timer_on", float('inf')) - (datetime.datetime.now() - sector_state.get("irradiance_timer_on_start", datetime.datetime.now())).total_seconds()
+                                if remaining > _get_dynamic_irradiance_delay_high(sector, val):
+                                    sector_state["irradiance_timer_on"].cancel()
+                                    sector_state["irradiance_timer_on"] = threading.Timer(_get_dynamic_irradiance_delay_high(sector, val), SectorRunner.set_irradiance_state, args=(sector["GUID"], 4))
+                                    sector_state["irradiance_timer_on"].daemon = True
+                                    sector_state["irradiance_timer_on"].start()
+                                    sector_state["irradiance_timer_on_start"] = datetime.datetime.now()
+                            elif sector_state.get("irradiance_state", 1) == 4:
+                                # Do Nothing, already in upper state
+                                pass
+                        elif val < _get_highest_irradiance_threshold_low(sector):
+                            if sector_state.get("irradiance_state", 1) == 1:
+                                # Do Nothing, already in lower state
+                                pass
+                            elif sector_state.get("irradiance_state", 1) == 2:
+                                remaining = _get_timer_interval(sector_state, "irradiance_timer_off", float('inf')) - (datetime.datetime.now() - sector_state.get("irradiance_timer_off_start", datetime.datetime.now())).total_seconds()
+                                if remaining > _get_dynamic_irradiance_delay_low(sector, val):
+                                    sector_state["irradiance_timer_off"].cancel()
+                                    sector_state["irradiance_timer_off"] = threading.Timer(_get_dynamic_irradiance_delay_low(sector, val), SectorRunner.set_irradiance_state, args=(sector["GUID"], 1))
+                                    sector_state["irradiance_timer_off"].daemon = True
+                                    sector_state["irradiance_timer_off"].start()
+                                    sector_state["irradiance_timer_off_start"] = datetime.datetime.now()
+                            elif sector_state.get("irradiance_state", 1) == 3:
+                                sector_state["irradiance_state"] = 1
+                                sector_state["irradiance_timer_on"].cancel()
+                            elif sector_state.get("irradiance_state", 1) == 4:
+                                sector_state["irradiance_state"] = 2
+                                sector_state["irradiance_timer_off"] = threading.Timer(_get_dynamic_irradiance_delay_low(sector, val), SectorRunner.set_irradiance_state, args=(sector["GUID"], 1))
+                                sector_state["irradiance_timer_off"].daemon = True
+                                sector_state["irradiance_timer_off"].start()
+                                sector_state["irradiance_timer_off_start"] = datetime.datetime.now()
+
+                    else:
+                        if val > sector["IrradianceUpperThreshold"] and sector_state.get("irradiance_state", 1) == 1:
+                            sector_state["irradiance_state"] = 3
+                            sector_state["irradiance_timer_on"] = threading.Timer(sector["IrradianceUpperDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"], 4))
+                            sector_state["irradiance_timer_on"].daemon = True
+                            sector_state["irradiance_timer_on"].start()
+                        elif val > sector["IrradianceUpperThreshold"] and sector_state.get("irradiance_state", 1) == 2:
+                            sector_state["irradiance_state"] = 4
+                            sector_state["irradiance_timer_off"].cancel()
+                        elif val < sector["IrradianceLowerThreshold"] and sector_state.get("irradiance_state", 1) == 3:
+                            sector_state["irradiance_state"] = 1
+                            sector_state["irradiance_timer_on"].cancel()
+                        elif val < sector["IrradianceLowerThreshold"] and sector_state.get("irradiance_state", 1) == 4:
+                            sector_state["irradiance_state"] = 2
+                            sector_state["irradiance_timer_off"] = threading.Timer(sector["IrradianceLowerDelay"], SectorRunner.set_irradiance_state, args=(sector["GUID"], 1))
+                            sector_state["irradiance_timer_off"].daemon = True
+                            sector_state["irradiance_timer_off"].start()
             
             if str(telegram.destination_address) == sector["OnAutoAddress"]:
                 try:
