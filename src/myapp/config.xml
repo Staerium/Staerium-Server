@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Konfiguration>
-  <Version>1.0.0</Version>
+  <Version>1.1.0</Version>
   <Latitude>47.377672</Latitude>
   <Longitude>8.518703</Longitude>
   <AzElOption>BusTime</AzElOption>
@@ -23,17 +23,19 @@
     <Sector>
       <GUID>00247f60-ed21-4bc8-9ca7-48ddc290042a</GUID>
       <Name>Sektor 1</Name>
-      <Orientation>180</Orientation>
+      <Orientation>180.0</Orientation>
       <HorizonLimit>true</HorizonLimit>
       <LouvreTracking>true</LouvreTracking>
-      <LouvreSpacing>70</LouvreSpacing>
-      <LouvreDepth>80</LouvreDepth>
-      <LouvreAngleAtZero>90</LouvreAngleAtZero>
-      <LouvreAngleAtHundred>3</LouvreAngleAtHundred>
-      <LouvreMinimumChange>20</LouvreMinimumChange>
-      <LouvreBuffer>5</LouvreBuffer>
+      <LouvreSpacing>70.0</LouvreSpacing>
+      <LouvreDepth>80.0</LouvreDepth>
+      <LouvreAngleAtZero>90.0</LouvreAngleAtZero>
+      <LouvreAngleAtHundred>3.0</LouvreAngleAtHundred>
+      <LouvreMinimumChange>20.0</LouvreMinimumChange>
+      <LouvreBuffer>5.0</LouvreBuffer>
       <UseBrightness>true</UseBrightness>
       <UseIrradiance>true</UseIrradiance>
+      <BrightnessDynamicDelay>false</BrightnessDynamicDelay>
+      <IrradianceDynamicDelay>false</IrradianceDynamicDelay>
       <BrightnessAddress>2/0/0</BrightnessAddress>
       <HeightAddress>2/0/6</HeightAddress>
       <LouvreAngleAddress>2/0/2</LouvreAngleAddress>
@@ -42,6 +44,10 @@
       <BrightnessUpperDelay>30</BrightnessUpperDelay>
       <BrightnessLowerThreshold>90000</BrightnessLowerThreshold>
       <BrightnessLowerDelay>60</BrightnessLowerDelay>
+      <BrightnessDelayHigh/>
+      <BrightnessDelayLow/>
+      <IrradianceDelayHigh/>
+      <IrradianceDelayLow/>
       <IrradianceAddress>2/0/1</IrradianceAddress>
       <IrradianceUpperThreshold>200</IrradianceUpperThreshold>
       <IrradianceUpperDelay>10</IrradianceUpperDelay>
@@ -57,75 +63,77 @@
       <FacadeEnd></FacadeEnd>
       <HorizonPoints>
         <Point>
-          <X>-90</X>
-          <Y>30</Y>
+          <X>-90.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>-50</X>
-          <Y>30</Y>
+          <X>-50.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>-50</X>
-          <Y>50</Y>
+          <X>-50.0</X>
+          <Y>50.0</Y>
         </Point>
         <Point>
-          <X>0</X>
-          <Y>60</Y>
+          <X>0.0</X>
+          <Y>60.0</Y>
         </Point>
         <Point>
-          <X>0</X>
-          <Y>30</Y>
+          <X>0.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>30</X>
-          <Y>40</Y>
+          <X>30.0</X>
+          <Y>40.0</Y>
         </Point>
         <Point>
-          <X>50</X>
-          <Y>30</Y>
+          <X>50.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>70</X>
-          <Y>30</Y>
+          <X>70.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>89</X>
-          <Y>30</Y>
+          <X>89.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>90</X>
-          <Y>90</Y>
+          <X>90.0</X>
+          <Y>90.0</Y>
         </Point>
       </HorizonPoints>
       <CeilingPoints>
         <Point>
-          <X>-90</X>
-          <Y>90</Y>
+          <X>-90.0</X>
+          <Y>90.0</Y>
         </Point>
         <Point>
-          <X>30</X>
-          <Y>30</Y>
+          <X>30.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>90</X>
-          <Y>90</Y>
+          <X>90.0</X>
+          <Y>90.0</Y>
         </Point>
       </CeilingPoints>
     </Sector>
     <Sector>
       <GUID>67609431-421a-4614-b638-d144db864348</GUID>
       <Name>Sektor 2</Name>
-      <Orientation>90</Orientation>
+      <Orientation>90.0</Orientation>
       <HorizonLimit>false</HorizonLimit>
       <LouvreTracking>false</LouvreTracking>
-      <LouvreSpacing>0</LouvreSpacing>
-      <LouvreDepth>0</LouvreDepth>
-      <LouvreAngleAtZero>90</LouvreAngleAtZero>
-      <LouvreAngleAtHundred>0</LouvreAngleAtHundred>
-      <LouvreMinimumChange>20</LouvreMinimumChange>
-      <LouvreBuffer>5</LouvreBuffer>
+      <LouvreSpacing>0.0</LouvreSpacing>
+      <LouvreDepth>0.0</LouvreDepth>
+      <LouvreAngleAtZero>90.0</LouvreAngleAtZero>
+      <LouvreAngleAtHundred>0.0</LouvreAngleAtHundred>
+      <LouvreMinimumChange>20.0</LouvreMinimumChange>
+      <LouvreBuffer>5.0</LouvreBuffer>
       <UseBrightness>true</UseBrightness>
       <UseIrradiance>true</UseIrradiance>
+      <BrightnessDynamicDelay>false</BrightnessDynamicDelay>
+      <IrradianceDynamicDelay>false</IrradianceDynamicDelay>
       <BrightnessAddress>2/1/0</BrightnessAddress>
       <HeightAddress>2/1/6</HeightAddress>
       <LouvreAngleAddress>3/4/5</LouvreAngleAddress>
@@ -134,6 +142,10 @@
       <BrightnessUpperDelay>20</BrightnessUpperDelay>
       <BrightnessLowerThreshold>10</BrightnessLowerThreshold>
       <BrightnessLowerDelay>0</BrightnessLowerDelay>
+      <BrightnessDelayHigh/>
+      <BrightnessDelayLow/>
+      <IrradianceDelayHigh/>
+      <IrradianceDelayLow/>
       <IrradianceAddress>2/1/1</IrradianceAddress>
       <IrradianceUpperThreshold>300</IrradianceUpperThreshold>
       <IrradianceUpperDelay>200</IrradianceUpperDelay>
@@ -149,38 +161,158 @@
       <FacadeEnd></FacadeEnd>
       <HorizonPoints>
         <Point>
-          <X>-90</X>
-          <Y>0</Y>
+          <X>-90.0</X>
+          <Y>0.0</Y>
         </Point>
         <Point>
-          <X>90</X>
-          <Y>0</Y>
+          <X>90.0</X>
+          <Y>0.0</Y>
         </Point>
       </HorizonPoints>
       <CeilingPoints>
         <Point>
-          <X>-90</X>
-          <Y>90</Y>
+          <X>-90.0</X>
+          <Y>30.0</Y>
         </Point>
         <Point>
-          <X>-90</X>
-          <Y>30</Y>
+          <X>-90.0</X>
+          <Y>90.0</Y>
         </Point>
         <Point>
-          <X>0</X>
-          <Y>0</Y>
+          <X>0.0</X>
+          <Y>0.0</Y>
         </Point>
         <Point>
-          <X>0</X>
-          <Y>0</Y>
+          <X>0.0</X>
+          <Y>0.0</Y>
         </Point>
         <Point>
-          <X>90</X>
-          <Y>90</Y>
+          <X>90.0</X>
+          <Y>90.0</Y>
         </Point>
         <Point>
-          <X>90</X>
-          <Y>90</Y>
+          <X>90.0</X>
+          <Y>90.0</Y>
+        </Point>
+      </CeilingPoints>
+    </Sector>
+    <Sector>
+      <GUID>6246e933-19fd-46bc-8057-72af5b0d1d77</GUID>
+      <Name>Sektor 3</Name>
+      <Orientation>90.0</Orientation>
+      <HorizonLimit>false</HorizonLimit>
+      <LouvreTracking>false</LouvreTracking>
+      <LouvreSpacing>0.0</LouvreSpacing>
+      <LouvreDepth>0.0</LouvreDepth>
+      <LouvreAngleAtZero>90.0</LouvreAngleAtZero>
+      <LouvreAngleAtHundred>0.0</LouvreAngleAtHundred>
+      <LouvreMinimumChange>20.0</LouvreMinimumChange>
+      <LouvreBuffer>5.0</LouvreBuffer>
+      <UseBrightness>true</UseBrightness>
+      <UseIrradiance>false</UseIrradiance>
+      <BrightnessDynamicDelay>true</BrightnessDynamicDelay>
+      <IrradianceDynamicDelay>false</IrradianceDynamicDelay>
+      <BrightnessAddress>2/1/0</BrightnessAddress>
+      <HeightAddress>2/1/6</HeightAddress>
+      <LouvreAngleAddress>3/4/5</LouvreAngleAddress>
+      <SunBoolAddress>2/1/3</SunBoolAddress>
+      <BrightnessUpperThreshold>30</BrightnessUpperThreshold>
+      <BrightnessUpperDelay>20</BrightnessUpperDelay>
+      <BrightnessLowerThreshold>10</BrightnessLowerThreshold>
+      <BrightnessLowerDelay>0</BrightnessLowerDelay>
+      <BrightnessDelayHigh>
+        <Point>
+          <Brightness>60000.0</Brightness>
+          <Seconds>10.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>40000.0</Brightness>
+          <Seconds>600.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>45000.0</Brightness>
+          <Seconds>60.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>50000.0</Brightness>
+          <Seconds>20.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>55000.0</Brightness>
+          <Seconds>15.0</Seconds>
+        </Point>
+      </BrightnessDelayHigh>
+      <BrightnessDelayLow>
+        <Point>
+          <Brightness>5000.0</Brightness>
+          <Seconds>60.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>10000.0</Brightness>
+          <Seconds>120.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>15000.0</Brightness>
+          <Seconds>600.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>20000.0</Brightness>
+          <Seconds>1200.0</Seconds>
+        </Point>
+        <Point>
+          <Brightness>30000.0</Brightness>
+          <Seconds>1800.0</Seconds>
+        </Point>
+      </BrightnessDelayLow>
+      <IrradianceDelayHigh/>
+      <IrradianceDelayLow/>
+      <IrradianceAddress>2/1/1</IrradianceAddress>
+      <IrradianceUpperThreshold>300</IrradianceUpperThreshold>
+      <IrradianceUpperDelay>200</IrradianceUpperDelay>
+      <IrradianceLowerThreshold>100</IrradianceLowerThreshold>
+      <IrradianceLowerDelay>90</IrradianceLowerDelay>
+      <BrightnessIrradianceLink>And</BrightnessIrradianceLink>
+      <OnAutoAddress>2/1/4</OnAutoAddress>
+      <OnAutoBehavior>Auto</OnAutoBehavior>
+      <OffAutoAddress>2/1/5</OffAutoAddress>
+      <OffAutoBehavior>Auto</OffAutoBehavior>
+      <FacadeAddress></FacadeAddress>
+      <FacadeStart></FacadeStart>
+      <FacadeEnd></FacadeEnd>
+      <HorizonPoints>
+        <Point>
+          <X>-90.0</X>
+          <Y>0.0</Y>
+        </Point>
+        <Point>
+          <X>90.0</X>
+          <Y>0.0</Y>
+        </Point>
+      </HorizonPoints>
+      <CeilingPoints>
+        <Point>
+          <X>-90.0</X>
+          <Y>30.0</Y>
+        </Point>
+        <Point>
+          <X>-90.0</X>
+          <Y>90.0</Y>
+        </Point>
+        <Point>
+          <X>0.0</X>
+          <Y>0.0</Y>
+        </Point>
+        <Point>
+          <X>0.0</X>
+          <Y>0.0</Y>
+        </Point>
+        <Point>
+          <X>90.0</X>
+          <Y>90.0</Y>
+        </Point>
+        <Point>
+          <X>90.0</X>
+          <Y>90.0</Y>
         </Point>
       </CeilingPoints>
     </Sector>

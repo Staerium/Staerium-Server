@@ -127,6 +127,7 @@ def telegram_received(telegram):
                 logger.info("Elevation from bus: %s°", elevation)
                 sun.current_elevation = elevation
 
+        # Brightness Threshold
         for sector in configuration.sectors:
             if str(telegram.destination_address) == sector["BrightnessAddress"] and sector["UseBrightness"]:
                 try:
@@ -160,6 +161,7 @@ def telegram_received(telegram):
                         sector_state["brightness_timer_off"].daemon = True
                         sector_state["brightness_timer_off"].start()
 
+            # Irradiance Threshold
             if str(telegram.destination_address) == sector["IrradianceAddress"] and sector["UseIrradiance"]:
                 try:
                     val = decode_dpt9(telegram.payload.value.value)
