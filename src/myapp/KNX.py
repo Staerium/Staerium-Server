@@ -44,6 +44,80 @@ def decode_dpt14(byte_quad):
         return math.nan
     return struct.unpack('!f', b)[0]
 
+def _get_lowest_brightness_threshold_high(sector):
+    if not sector.get("BrightnessDelayHigh"):
+        return sector.get("BrightnessUpperThreshold")
+    return min(point.get("Brightness", float('inf')) for point in sector["BrightnessDelayHigh"]["Point"])
+
+def _get_highest_brightness_threshold_low(sector):
+    if not sector.get("BrightnessDelayLow"):
+        return sector.get("BrightnessLowerThreshold")
+    return max(point.get("Brightness", float(0)) for point in sector["BrightnessDelayLow"]["Point"])
+
+def _get_timer_interval(sector_state, key, default):
+    try: 
+        timer = sector_state.get(key)
+        return float(timer.interval)
+    except Exception:
+        return default
+    
+def _get_dynamic_brightness_delay_high(sector, val):
+    if not sector.get("BrightnessDelayHigh"):
+        return sector.get("BrightnessUpperDelay")
+    points = sector["BrightnessDelayHigh"]["Point"]
+    if len(points) < 2:
+        return points[0].get("Seconds", sector.get("BrightnessUpperDelay"))
+    
+    # Find the two points to interpolate between
+    sorted_points = sorted(points, key=lambda p: p.get("Brightness", float('inf')))
+    
+    for i in range(len(sorted_points) - 1):
+        x1 = sorted_points[i].get("Brightness", float('inf'))
+        x2 = sorted_points[i + 1].get("Brightness", float('inf'))
+        y1 = sorted_points[i].get("Seconds", sector.get("BrightnessUpperDelay"))
+        y2 = sorted_points[i + 1].get("Seconds", sector.get("BrightnessUpperDelay"))
+        
+        if x1 <= val <= x2:
+            # Linear interpolation
+            if x2 == x1:
+                return y1
+            return y1 + (val - x1) * (y2 - y1) / (x2 - x1)
+    
+    # If val is outside range, return the closest point's delay
+    if val < sorted_points[0].get("Brightness", float('inf')):
+        return sorted_points[0].get("Seconds", sector.get("BrightnessUpperDelay"))
+    else:
+        return sorted_points[-1].get("Seconds", sector.get("BrightnessUpperDelay"))
+    
+def _get_dynamic_brightness_delay_low(sector, val):
+    if not sector.get("BrightnessDelayLow"):
+        return sector.get("BrightnessLowerDelay")
+    points = sector["BrightnessDelayLow"]["Point"]
+    if len(points) < 2:
+        return points[0].get("Seconds", sector.get("BrightnessLowerDelay"))
+    
+    # Find the two points to interpolate between
+    sorted_points = sorted(points, key=lambda p: p.get("Brightness", float('inf')))
+    
+    for i in range(len(sorted_points) - 1):
+        x1 = sorted_points[i].get("Brightness", float('inf'))
+        x2 = sorted_points[i + 1].get("Brightness", float('inf'))
+        y1 = sorted_points[i].get("Seconds", sector.get("BrightnessLowerDelay"))
+        y2 = sorted_points[i + 1].get("Seconds", sector.get("BrightnessLowerDelay"))
+        
+        if x1 <= val <= x2:
+            # Linear interpolation
+            if x2 == x1:
+                return y1
+            return y1 + (val - x1) * (y2 - y1) / (x2 - x1)
+    
+    # If val is outside range, return the closest point's delay
+    if val < sorted_points[0].get("Brightness", float('inf')):
+        return sorted_points[0].get("Seconds", sector.get("BrightnessLowerDelay"))
+    else:
+        return sorted_points[-1].get("Seconds", sector.get("BrightnessLowerDelay"))
+
+
 def telegram_received(telegram):
     try:
         """Callback for received KNX telegrams."""
@@ -144,22 +218,69 @@ def telegram_received(telegram):
                 with SectorRunner.sectors_lock:
                     sector_state = SectorRunner.sectors[sector["GUID"]]
                     sector_state["Brightness"] = val
-                    if val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 1:
-                        sector_state["brightness_state"] = 3
-                        sector_state["brightness_timer_on"] = threading.Timer(sector["BrightnessUpperDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 4))
-                        sector_state["brightness_timer_on"].daemon = True
-                        sector_state["brightness_timer_on"].start()
-                    elif val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 2:
-                        sector_state["brightness_state"] = 4
-                        sector_state["brightness_timer_off"].cancel()
-                    elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 3:
-                        sector_state["brightness_state"] = 1
-                        sector_state["brightness_timer_on"].cancel()
-                    elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 4:
-                        sector_state["brightness_state"] = 2
-                        sector_state["brightness_timer_off"] = threading.Timer(sector["BrightnessLowerDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 1))
-                        sector_state["brightness_timer_off"].daemon = True
-                        sector_state["brightness_timer_off"].start()
+                    if sector["BrightnessDynamicDelay"]:
+                        if val > _get_lowest_brightness_threshold_high(sector):
+                            if sector_state.get("brightness_state", 1) == 1:
+                                sector_state["brightness_state"] = 3
+                                sector_state["brightness_timer_on"] = threading.Timer(_get_dynamic_brightness_delay_high(sector, val), SectorRunner.set_brightness_state, args=(sector["GUID"], 4))
+                                sector_state["brightness_timer_on"].daemon = True
+                                sector_state["brightness_timer_on"].start()
+                                sector_state["brightness_timer_on_start"] = datetime.datetime.now()
+                            elif sector_state.get("brightness_state", 1) == 2:
+                                sector_state["brightness_state"] = 4
+                                sector_state["brightness_timer_off"].cancel()
+                            elif sector_state.get("brightness_state", 1) == 3:
+                                remaining = _get_timer_interval(sector_state, "brightness_timer_on", float('inf')) - (datetime.datetime.now() - sector_state.get("brightness_timer_on_start", datetime.datetime.now())).total_seconds()
+                                if remaining > _get_dynamic_brightness_delay_high(sector, val):
+                                    sector_state["brightness_timer_on"].cancel()
+                                    sector_state["brightness_timer_on"] = threading.Timer(_get_dynamic_brightness_delay_high(sector, val), SectorRunner.set_brightness_state, args=(sector["GUID"], 4))
+                                    sector_state["brightness_timer_on"].daemon = True
+                                    sector_state["brightness_timer_on"].start()
+                                    sector_state["brightness_timer_on_start"] = datetime.datetime.now()
+                            elif sector_state.get("brightness_state", 1) == 4:
+                                # Do Nothing, already in upper state
+                                pass
+                        elif val < _get_highest_brightness_threshold_low(sector):
+                            if sector_state.get("brightness_state", 1) == 1:
+                                # Do Nothing, already in lower state
+                                pass
+                            elif sector_state.get("brightness_state", 1) == 2:
+                                remaining = _get_timer_interval(sector_state, "brightness_timer_off", float('inf')) - (datetime.datetime.now() - sector_state.get("brightness_timer_off_start", datetime.datetime.now())).total_seconds()
+                                if remaining > _get_dynamic_brightness_delay_low(sector, val):
+                                    sector_state["brightness_timer_off"].cancel()
+                                    sector_state["brightness_timer_off"] = threading.Timer(_get_dynamic_brightness_delay_low(sector, val), SectorRunner.set_brightness_state, args=(sector["GUID"], 1))
+                                    sector_state["brightness_timer_off"].daemon = True
+                                    sector_state["brightness_timer_off"].start()
+                                    sector_state["brightness_timer_off_start"] = datetime.datetime.now()
+                            elif sector_state.get("brightness_state", 1) == 3:
+                                sector_state["brightness_state"] = 1
+                                sector_state["brightness_timer_on"].cancel()
+                            elif sector_state.get("brightness_state", 1) == 4:
+                                sector_state["brightness_state"] = 2
+                                sector_state["brightness_timer_off"] = threading.Timer(_get_dynamic_brightness_delay_low(sector, val), SectorRunner.set_brightness_state, args=(sector["GUID"], 1))
+                                sector_state["brightness_timer_off"].daemon = True
+                                sector_state["brightness_timer_off"].start()
+                                sector_state["brightness_timer_off_start"] = datetime.datetime.now()
+
+
+
+                    else:
+                        if val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 1:
+                            sector_state["brightness_state"] = 3
+                            sector_state["brightness_timer_on"] = threading.Timer(sector["BrightnessUpperDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 4))
+                            sector_state["brightness_timer_on"].daemon = True
+                            sector_state["brightness_timer_on"].start()
+                        elif val > sector["BrightnessUpperThreshold"] and sector_state.get("brightness_state", 1) == 2:
+                            sector_state["brightness_state"] = 4
+                            sector_state["brightness_timer_off"].cancel()
+                        elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 3:
+                            sector_state["brightness_state"] = 1
+                            sector_state["brightness_timer_on"].cancel()
+                        elif val < sector["BrightnessLowerThreshold"] and sector_state.get("brightness_state", 1) == 4:
+                            sector_state["brightness_state"] = 2
+                            sector_state["brightness_timer_off"] = threading.Timer(sector["BrightnessLowerDelay"], SectorRunner.set_brightness_state, args=(sector["GUID"], 1))
+                            sector_state["brightness_timer_off"].daemon = True
+                            sector_state["brightness_timer_off"].start()
 
             # Irradiance Threshold
             if str(telegram.destination_address) == sector["IrradianceAddress"] and sector["UseIrradiance"]:
