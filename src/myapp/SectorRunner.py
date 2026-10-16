@@ -40,11 +40,16 @@ def calculate_lps():
 
 def set_brightness_state(guid, state):
     with sectors_lock:
+        # Timer.cancel() has no effect once the callback has started, so only complete a still-pending 3 -> 4 / 2 -> 1
+        if sectors[guid].get("brightness_state", 1) != (3 if state == 4 else 2):
+            return
         sectors[guid]["brightness_state"] = state
     logger.debug("Sector %s brightness state set to %s", guid, state)
 
 def set_irradiance_state(guid, state):
     with sectors_lock:
+        if sectors[guid].get("irradiance_state", 1) != (3 if state == 4 else 2):
+            return
         sectors[guid]["irradiance_state"] = state
     logger.debug("Sector %s irradiance state set to %s", guid, state)
 
