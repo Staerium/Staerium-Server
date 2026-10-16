@@ -284,7 +284,7 @@ def telegram_received(telegram):
                 with SectorRunner.sectors_lock:
                     sector_state = SectorRunner.sectors[sector["GUID"]]
                     sector_state["Brightness"] = val
-                    if sector["BrightnessDynamicDelay"]:
+                    if sector.get("BrightnessDynamicDelay", False):
                         if val > _get_lowest_brightness_threshold_high(sector):
                             if sector_state.get("brightness_state", 1) == 1:
                                 sector_state["brightness_state"] = 3
@@ -362,7 +362,7 @@ def telegram_received(telegram):
                 with SectorRunner.sectors_lock:
                     sector_state = SectorRunner.sectors[sector["GUID"]]
                     sector_state["Irradiance"] = val
-                    if sector["IrradianceDynamicDelay"]:
+                    if sector.get("IrradianceDynamicDelay", False):
                         if val > _get_lowest_irradiance_threshold_high(sector):
                             if sector_state.get("irradiance_state", 1) == 1:
                                 sector_state["irradiance_state"] = 3
