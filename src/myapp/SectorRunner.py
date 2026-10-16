@@ -165,6 +165,9 @@ def start(loop):
                         with sectors_lock:
                             sectors[guid]["angle_bytes_sent"] = 255  # reset to force angle send when sun comes back
                         future.result()
+                    if height_sender:
+                        future = asyncio.run_coroutine_threadsafe(height_sender.set(0), loop)
+                        future.result()
 
             # Louvre tracking
             elif sector["LouvreTracking"] and sun_state and louvre_sender:
