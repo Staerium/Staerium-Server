@@ -20,6 +20,7 @@ sectors_lock = threading.Lock()
 for sector in configuration.sectors:
     sectors[sector["GUID"]] = {}
     sectors[sector["GUID"]]["Mode"] = "Auto"
+    sectors[sector["GUID"]]["Name"] = sector["Name"]
 
 def calculate_lps():
     lps_timer = threading.Timer(10.0, calculate_lps)
@@ -44,14 +45,16 @@ def set_brightness_state(guid, state):
         if sectors[guid].get("brightness_state", 1) != (3 if state == 4 else 2):
             return
         sectors[guid]["brightness_state"] = state
-    logger.debug("Sector %s brightness state set to %s", guid, state)
+        name = sectors[guid]["Name"]
+    logger.debug("Sector %s brightness state set to %s", name, state)
 
 def set_irradiance_state(guid, state):
     with sectors_lock:
         if sectors[guid].get("irradiance_state", 1) != (3 if state == 4 else 2):
             return
         sectors[guid]["irradiance_state"] = state
-    logger.debug("Sector %s irradiance state set to %s", guid, state)
+        name = sectors[guid]["Name"]
+    logger.debug("Sector %s irradiance state set to %s", name, state)
 
 
 
@@ -149,7 +152,7 @@ def start(loop):
             if state_changed:
                 logger.info(
                     "Sector %s sun state changed to %s",
-                    sector["GUID"],
+                    sector["Name"],
                     "On" if sun_state else "Off",
                 )
                 if sun_state:
