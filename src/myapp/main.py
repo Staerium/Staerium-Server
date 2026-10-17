@@ -134,7 +134,7 @@ async def connect_knx() -> Any:
 async def _async_main() -> None:
     """Async CLI entry point handling KNX connection lifecycle."""
     logging_config.setup_logging(debug=configuration.Debug)
-    if not configuration.version in {"1.0.0", "0.9.6", "0.9.5", "0.9.4","0.9.3", "0.9.2", "0.9.1", "0.9.0"}:
+    if not configuration.version in {"1.1.1", "1.1.0", "1.0.0", "0.9.6", "0.9.5", "0.9.4","0.9.3", "0.9.2", "0.9.1", "0.9.0"}:
         logger.error(
             "Conficuration version %s is not supported by this Staerium Server version.",
             configuration.version,
