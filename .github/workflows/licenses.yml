@@ -1,0 +1,57 @@
+name: Update licenses.txt
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore:
+      - licenses.txt
+
+concurrency:
+  group: licenses-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update_licenses:
+    name: Generate and commit licenses.txt
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up venv and install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pip-licenses
+
+      - name: Generate licenses.txt
+        run: |
+          source .venv/bin/activate
+          pip-licenses \
+            --format=plain-vertical \
+            --with-license-file --no-license-path \
+            --ignore-packages pip setuptools pip-licenses \
+            --output-file=licenses.txt
+
+      - name: Commit updated licenses.txt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add licenses.txt
+          if git diff --cached --quiet; then
+            echo "No changes to licenses.txt; skipping commit."
+            exit 0
+          fi
+          git commit -m "chore: update licenses.txt"
+          git push origin HEAD:${{ github.ref_name }}
